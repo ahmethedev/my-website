@@ -3,16 +3,11 @@ import Social from "@/components/social";
 
 export default function About() {
   const paragraphs = [
-    `As a Front-end Engineer working independently, I specialize in
-    building user interfaces for various brands. My passion lies in the
-    intersection of design and coding, which has shaped my journey into
-    front-end development.`,
-    `Driven by a love for software development, I thrive on receiving user
-    feedback and improving the overall user experience. It's
-    especially exciting to streamline production and focus solely on
-    building.`,
-    `Outside of work, I enjoy creating minimalist digital products that
-    solve web-related challenges and simplify our development workflow.`,
+    `Seasoned software enthusiast with a diverse background spanning robotics, blockchain, and machine learning. 
+    Currently focusing on Data and Infrastructure, with a keen interest in distributed systems and databases.`,
+    `Driven by a love for software development and data, I thrive on building new products that solve real-world problems.
+    I have a passion for building products that make a difference.`,
+    `Outside of work, I enjoy blogging and going to the gym.`,
   ];
 
   return (
@@ -22,7 +17,7 @@ export default function About() {
       text-zinc-800 dark:text-zinc-200 container animate-enter"
     >
       <p className="my-5 text-zinc-800 dark:text-zinc-200">
-        Hi, I&apos;m Onurhan.
+        Hi, I&apos;m Ahmet.
       </p>
       {paragraphs.map((paragraph, index) => (
         <div

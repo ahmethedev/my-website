@@ -25,21 +25,14 @@ export const Header = () => {
         >
           <div className="flex flex-row items-center">
             <Link href="/">
-              <Image
-                src="/logo.svg"
-                alt="Logo"
-                width={40}
-                height={40}
-                priority={true}
-              />
-              <span className="sr-only">Onurhan Demir</span>
+              <span className="sr-only">Ahmet Burak Dinc</span>
             </Link>
 
             <div className="flex flex-col ml-4">
               <span className="text-medium inline-block font-medium">
-                Onurhan Demir
+              Ahmet Burak Dinc
               </span>
-              <span className="opacity-60">frontend engineer</span>
+              <span className="opacity-60">Software engineer</span>
             </div>
           </div>
 

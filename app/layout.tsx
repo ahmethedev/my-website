@@ -10,27 +10,19 @@ import { ThemeProvider } from "./theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://onurhan.dev"),
+  metadataBase: new URL("https://ahmethe.dev"),
   title: {
-    default: "Onurhan Demir",
-    template: "%s | Onurhan Demir",
+    default: "Ahmet Burak Dinc",
+    template: "%s | Ahmet Burak Dinc",
   },
   description: "Front-end Engineer",
   openGraph: {
-    title: "Onurhan Demir",
+    title: "Ahmet Burak Dinc",
     description: "Front-end Engineer",
-    url: "https://onurhan.dev",
-    siteName: "Onurhan Demir",
+    url: "https://ahmethe.dev",
+    siteName: "Ahmet Burak Dinc",
     locale: "en_US",
     type: "website",
-    images: [
-      {
-        url: "https://onurhan.dev/logo.svg",
-        width: 1200,
-        height: 630,
-        alt: "Onurhan Demir",
-      },
-    ],
   },
   robots: {
     index: true,
@@ -44,7 +36,7 @@ export const metadata: Metadata = {
     },
   },
   twitter: {
-    title: "Onurhan Demir",
+    title: "Ahmet Burak Dinc",
     card: "summary_large_image",
   },
   verification: {
