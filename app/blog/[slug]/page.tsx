@@ -5,7 +5,6 @@ import { notFound } from "next/navigation";
 import { getBlogPosts } from "@/app/db/blog";
 import { CustomMDX } from "@/components/mdx";
 import { formatDate } from "@/lib/utils";
-import Claps from "@/components/claps";
 
 export async function generateMetadata({
   params,
@@ -20,7 +19,7 @@ export async function generateMetadata({
     publishedAt: publishedTime,
     summary: description,
   } = blog.metadata;
-  let ogImage = `https://onurhan.dev/logo.svg`;
+  let ogImage = `https://ahmethe.dev/logo.svg`;
 
   return {
     title,
@@ -30,7 +29,7 @@ export async function generateMetadata({
       description,
       type: "article",
       publishedTime,
-      url: `https://onurhan.dev/blog/${blog.slug}`,
+      url: `https://ahmethe.dev/blog/${blog.slug}`,
       images: [
         {
           url: ogImage,
@@ -67,12 +66,12 @@ export default function BlogDetailPage({ params }) {
             dateModified: blog.metadata.publishedAt,
             description: blog.metadata.summary,
             image: blog.metadata.image
-              ? `https://onurhan.dev${blog.metadata.image}`
-              : `https://onurhan.dev/og?title=${blog.metadata.title}`,
-            url: `https://onurhan.dev/blog/${blog.slug}`,
+              ? `https://ahmethe.dev${blog.metadata.image}`
+              : `https://ahmethe.dev/og?title=${blog.metadata.title}`,
+            url: `https://ahmethe.dev/blog/${blog.slug}`,
             author: {
               "@type": "Person",
-              name: "Onurhan Demir",
+              name: "Ahmet Burak Dinc",
             },
           }),
         }}
@@ -94,7 +93,6 @@ export default function BlogDetailPage({ params }) {
       <article className="prose prose-quoteless prose-neutral dark:prose-invert text-justify w-auto">
         <CustomMDX source={blog.content} />
       </article>
-      <Claps />
     </section>
   );
 }

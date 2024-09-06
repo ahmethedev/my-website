@@ -8,7 +8,7 @@ import { BlogCard } from "@/components/blog-card";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Read my thoughts on frontend development, design, and more.",
+  description: "Read my thoughts on Infrasturcture, data, and more.",
 };
 
 export default function Blog() {

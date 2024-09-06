@@ -1,6 +1,5 @@
-# onurhan.dev
+# ahmethe.dev
 
-<a href="https://www.buymeacoffee.com/onurhan"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=onurhan&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff" /></a>
 
 - **Icons**: [Lucide React](https://lucide.dev/icons/)
 - **Like**: [Upstash Claps](https://github.com/upstash/claps)
@@ -25,7 +24,7 @@
 ## Demo
 
 ```bash
-https://onurhan.dev
+https://ahmethe.dev
 ```
 
 ## Running Locally
@@ -33,7 +32,7 @@ https://onurhan.dev
 This application requires Node.js v16.13+.
 
 ```bash
-git clone https://github.com/onurhan1337/my-website.git
+git clone https://github.com/ahmethedev/my-website.git
 cd my-website
 npm install
 npm run dev
