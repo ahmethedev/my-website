@@ -32,7 +32,7 @@ export const Header = () => {
               <span className="text-medium inline-block font-medium">
               Ahmet Burak Dinc
               </span>
-              <span className="opacity-60">Software engineer - Indie Hacker</span>
+              <span className="opacity-60">Software engineer</span>
             </div>
           </div>
 
