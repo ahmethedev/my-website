@@ -2,7 +2,7 @@
 
 
 - **Icons**: [Lucide React](https://lucide.dev/icons/)
-- **Like**: [Upstash Claps](https://github.com/upstash/claps)
+
 - **Framework**: [Next.js](https://nextjs.org/)
 - **Deployment**: [Vercel](https://vercel.com)
 - **Syntax Highlight**: [Sugar High](https://github.com/huozhi/sugar-high)
@@ -11,7 +11,7 @@
 
 ## Overview
 
-- `pages/api/*` - [API Routes](https://nextjs.org/docs/api-routes/introduction), claps.
+
 - `app/blog/*` - Static pre-rendered blog pages using Contentlayer.
 - `app/*` - All other pages.
 - `components/` - All components.
@@ -38,7 +38,7 @@ npm install
 npm run dev
 ```
 
-Create a `.env` file similar to [`.env.example`](https://github.com/onurhan1337/my-website/blob/master/.env.example). You don't need to fill them out for the site to work. However, it is required to be able to use the [Upstash/Claps](https://github.com/upstash/claps) package.
+Create a `.env` file similar to [`.env.example`](https://github.com/onurhan1337/my-website/blob/master/.env.example). You don't need to fill them out for the site to work.
 
 ## Cloning / Forking
 
@@ -76,11 +76,3 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-# Inspiration
-
-- [@rauchg](https://twitter.com/emilkowalski_)
-- [@ademilter](https://twitter.com/ademilter)
-- [@leerob](https://twitter.com/leeerob)
-- [@shadcn](https://twitter.com/shadcn)
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
