@@ -15,10 +15,10 @@ export const metadata: Metadata = {
     default: "Ahmet Burak Dinc",
     template: "%s | Ahmet Burak Dinc",
   },
-  description: "Front-end Engineer",
+  description: "Software Engineer",
   openGraph: {
     title: "Ahmet Burak Dinc",
-    description: "Front-end Engineer",
+    description: "Software Engineer",
     url: "https://ahmethe.dev",
     siteName: "Ahmet Burak Dinc",
     locale: "en_US",
