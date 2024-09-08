@@ -3,11 +3,10 @@ import Social from "@/components/social";
 
 export default function About() {
   const paragraphs = [
-    `Seasoned software enthusiast with a diverse background spanning robotics, blockchain, and machine learning. 
+    `Seasoned software enthusiast with a diverse background Full-stack web development and machine learning. 
     Currently focusing on Data and Infrastructure, with a keen interest in distributed systems and databases.`,
     `Driven by a love for software development and data, I thrive on building new products that solve real-world problems.
     I have a passion for building products that make a difference.`,
-    `Outside of work, I enjoy blogging and going to the gym.`,
   ];
 
   return (
