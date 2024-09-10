@@ -1,0 +1,24 @@
+---
+title: "Virtualization vs Containerization"
+publishedAt: "2024-09-08"
+summary: "Why did we need Containers?"
+---
+
+
+In today's world, big companies are built with containers like the bricks that we have been building our houses with. But how did we come to this point? Where did containers come from? Let's dive into the history of containers and how they differ from virtual machines.
+ 
+All innovations come from necessity. This is not exceptional for virtualization. The more machines a company uses, the harder it is to manage all physical machines. It's harder to store them, maintain their physical conditions, and create a network for these machines using cables. Virtualization was a necessity for these problems.
+ 
+Virtualization brought efficient resource utilization. It allows multiple virtual machines (VMs) to run on a single physical server. This improves the utilization of hardware resources, such as CPU, memory, and storage. Instead of having multiple servers running at low capacity, virtualization consolidates them, reducing hardware costs and energy consumption.
+ 
+However, VMs are not perfect. With virtualization, you virtualize whole OS components within it. You're using your physical resources to virtualize the Kernel, File Management System, and Disk Management System in your VMs. This whole process takes quite a lot of time and physical resources. Even though Moore's Law tells us that our transistors are doubling in number every year, physical resources are still very valuable for companies. VMware and VirtualBox are two applications used for virtualization.
+ 
+In today's world, speed is crucial. The world is changing in seconds, and companies need to deploy very fast and in an efficient way. As I said earlier, all innovations come from necessity. Some engineers from Linux and Google came up with new innovations for the computer world: cgroups and namespaces. With these new technologies, we can run processes independently with reserved resources of our host OS. This is the definition of Containers. We no longer need to create a VM, install whole OS components, and then build an application. Instead, we can use containers which use host OS resources.
+ 
+Containers are lightweight and faster compared to VMs. You don't need to install whole OS components. You can install libraries that your container's apps use. If your container contains a 100MB application, when it's run, it only takes 100MB of resources. But if you try it with VMs, for your 100MB application to run, you need to run a whole OS, which might take more than 500MB.
+ 
+But like VMs, containers are not perfect. Container vulnerability is a very important topic to discuss. As mentioned, containers use the host OS kernel. Any vulnerability in the host OS kernel can affect container security.
+ 
+Docker is the most popular application used for containerization.
+ 
+In my next blog post, we'll dive into Docker architecture and commands to create containers.
