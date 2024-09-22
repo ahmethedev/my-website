@@ -5,7 +5,7 @@ export default function robots() {
         userAgent: "*",
       },
     ],
-    sitemap: "https://ahmethe.dev/sitemap.xml",
-    host: "https://ahmethe.dev",
+    sitemap: "https://abd.im/sitemap.xml",
+    host: "https://abd.im",
   };
 }

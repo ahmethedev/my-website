@@ -19,7 +19,7 @@ export async function generateMetadata({
     publishedAt: publishedTime,
     summary: description,
   } = blog.metadata;
-  let ogImage = `https://ahmethe.dev/logo.svg`;
+  let ogImage = `https://abd.im/logo.svg`;
 
   return {
     title,
@@ -29,7 +29,7 @@ export async function generateMetadata({
       description,
       type: "article",
       publishedTime,
-      url: `https://ahmethe.dev/blog/${blog.slug}`,
+      url: `https://abd.im/blog/${blog.slug}`,
       images: [
         {
           url: ogImage,
@@ -66,9 +66,9 @@ export default function BlogDetailPage({ params }) {
             dateModified: blog.metadata.publishedAt,
             description: blog.metadata.summary,
             image: blog.metadata.image
-              ? `https://ahmethe.dev${blog.metadata.image}`
-              : `https://ahmethe.dev/og?title=${blog.metadata.title}`,
-            url: `https://ahmethe.dev/blog/${blog.slug}`,
+              ? `https://abd.im${blog.metadata.image}`
+              : `https://abd.im/og?title=${blog.metadata.title}`,
+            url: `https://abd.im/blog/${blog.slug}`,
             author: {
               "@type": "Person",
               name: "Ahmet Burak Dinc",

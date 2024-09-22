@@ -10,7 +10,7 @@ import { ThemeProvider } from "./theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ahmethe.dev"),
+  metadataBase: new URL("https://abd.im"),
   title: {
     default: "Ahmet Burak Dinc",
     template: "%s | Ahmet Burak Dinc",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Ahmet Burak Dinc",
     description: "Software Engineer",
-    url: "https://ahmethe.dev",
+    url: "https://abd.im",
     siteName: "Ahmet Burak Dinc",
     locale: "en_US",
     type: "website",

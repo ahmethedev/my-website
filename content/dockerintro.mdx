@@ -1,0 +1,170 @@
+---
+title: "Docker 101"
+publishedAt: "2024-09-17"
+summary: "Introduction to the Docker Architecture"
+---
+
+In my last blog post, we compared virtualization and containerization. As I said at the end of that blog post, I am going to write about Docker architecture and some of the most common commands to containerize your applications. Let’s dive in.
+
+Docker is a containerization tool. Under the hood, Docker uses namespaces and cgroups to create independent processes on your host OS without having to install VMs. Docker helps us manage some low-level computer processes like namespaces and cgroups.
+
+Like other well-known applications, Docker employs a client-server architecture using a REST API. You might wonder why Docker needs a client-server architecture. Does it send requests to some servers? It actually does, but not quite like you think.
+
+## Docker Architecture
+
+Docker architecture consists of a client (Docker Desktop or CMD) and a server (Docker Daemon). The Docker daemon executes commands issued by the client by translating them into actionable operations within the Docker environment. The Docker daemon also manages containers and images.
+
+You might have heard about “Docker Engine” at least once in your career; it is essentially the Docker daemon. You can easily install Docker Desktop and start your Docker engine. At this point, Docker Desktop acts as both the client and the server. The engine runs in the background and waits for commands from the client.
+
+## Managing Containers and Images
+
+Here is a simple roadmap if you would like to dockerize your application:
+
+1. Create a Dockerfile in your application’s repo:
+   ```bash
+   touch Dockerfile
+   ```
+
+2. Build the image from this Dockerfile:
+   ```bash
+   docker build .
+   ```
+
+3. Create and run a container that contains your application:
+   ```bash
+   docker run <image_name>
+   ```
+
+Docker instructions are in the Dockerfile to explain how the image will be created. You can check running containers in the Docker Desktop application or via CLI:
+```bash
+docker ps
+```
+
+### Example Dockerfile
+
+```
+# Use the Node.js 18 image as the base image for building the application
+FROM node:18 AS build
+
+# Set the working directory inside the container to /app
+WORKDIR /app
+
+# Copy the package.json and package-lock.json files to the working directory 
+COPY package*.json ./
+
+# Install the project dependencies listed in package.json
+RUN npm install
+
+# Copy the rest of the project files to the working directory
+COPY . .
+
+# Build the React application for production 
+RUN npm run build
+
+# Use a lightweight Nginx image to serve the built application
+FROM nginx:alpine
+
+# Copy the built application from the build stage to Nginx's default directory for serving HTML
+
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Expose port 80 to make the app accessible over HTTP
+
+EXPOSE 80
+
+# Start Nginx in the foreground (without daemonizing) 
+
+CMD ["nginx", "-g", "daemon off;"]
+
+```
+
+## What is Docker Hub?
+
+Docker Hub is a container registry designed for developers and open-source contributors to find, use, and share their container images. You can deploy your images or pull (download) other images created by developers. For this aspect, I compare Docker Hub to GitHub.
+
+You can download Docker images from the hub with:
+```bash
+docker pull <image_name>
+```
+
+Or you can push your images to the hub, but first, you have to log in:
+```bash
+docker login
+```
+Then:
+```bash
+docker push myusername/myapp:latest
+```
+
+## What is Docker Compose?
+
+Docker Compose helps us run multiple containers with a single command, `docker-compose up` and `docker-compose down`. To define Docker Compose, you must create a `docker-compose.yml` file. The most important feature of Docker Compose is that it automatically creates a network between connected containers.
+
+For example, if you dockerized both your application and the database, you can use `docker-compose up` to run these containers without having to create a distinct network for them.
+
+### Example docker-compose.yml File
+
+```yaml
+version: '3'
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: always
+  backend:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    command: npm start 
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+    restart: always
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432" 
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+volumes:
+  db_data:
+```
+
+You can run multiple containers (frontend and backend) using this `docker-compose.yml` with:
+```bash
+docker-compose up
+```
+
+## Additional Docker Commands
+
+Here are some other Docker commands you might find useful:
+
+- Run an interactive shell in the Ubuntu image:
+  ```bash
+  docker run -it ubuntu
+  ```
+
+- Run the Postgres image in the background:
+  ```bash
+  docker run -d postgres
+  ```
+
+- List running containers and images:
+  ```bash
+  docker ps
+  ```
+
+- Follow logs of a specific container:
+  ```bash
+  docker logs -f <container_id>
+  ```
