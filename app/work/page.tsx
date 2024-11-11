@@ -120,6 +120,20 @@ export default function Work() {
           </li>
         </ul>
       </div>
+      <div className="prose prose-neutral dark:prose-invert">
+        <hr className="my-6 border-neutral-200 dark:border-neutral-800" />
+        <h2 className="font-medium text-xl mb-1 tracking-tighter">
+          High School
+        </h2>
+        <ul>
+          <li>
+            Learnt arduino myself and built projects. Really enjoyed the robotics.
+          </li>
+          <li>
+            Built full stack website for school competatiton with using PHP and templates for frontend.
+          </li>
+        </ul>
+      </div>
     </Container>
   );
 }
