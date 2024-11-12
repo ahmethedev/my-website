@@ -4,7 +4,6 @@ publishedAt: "2024-11-11"
 summary: "A comprehensive guide on using OCR and LLMs for extracting data from complex table formats"
 ---
 
-# Advanced OCR Techniques For Extracting Data From Tables
 
 Extracting data from tables in images or PDFs is a common challenge in document processing. While several free OCR (Optical Character Recognition) tools exist, choosing the right approach depends heavily on your specific use case. This post explores various techniques for achieving high-accuracy data extraction from complex table formats.
 
@@ -40,6 +39,92 @@ Optimize your input images for better OCR accuracy:
 - Isolate table boundaries
 - Increase contrast between text and background
 - Focus on table extraction before text recognition
+
+
+
+```
+def find_content_bounds(image):
+    """
+    Finds tables boundries
+    """
+    # Convert image into np array
+    img_array = np.array(image)
+   
+    # Convert gray 
+    if len(img_array.shape) == 3:
+        img_gray = np.mean(img_array, axis=2)
+    else:
+        img_gray = img_array
+   
+    # Finds pixels which are not white (threshold: 250)
+    non_white = img_gray < 250
+   
+    # Finds content boundries
+    rows = np.any(non_white, axis=1)
+    cols = np.any(non_white, axis=0)
+   
+    # Takes indexes of boundries
+    top = np.argmax(rows)
+    bottom = len(rows) - np.argmax(rows[::-1])
+    left = np.argmax(cols)
+    right = len(cols) - np.argmax(cols[::-1])
+   
+    # Adding padding 
+    padding = 10
+    top = max(0, top - padding)
+    bottom = min(img_gray.shape[0], bottom + padding)
+    left = max(0, left - padding)
+    right = min(img_gray.shape[1], right + padding)
+   
+    return left, top, right, bottom
+
+def convert_pdf_to_images(pdf_path, output_dir, dpi=600):
+
+    os.makedirs(output_dir, exist_ok=True)
+    image_paths = []
+   
+    try:
+        images = convert_from_path(
+            pdf_path,
+            dpi=dpi,
+            fmt='png',
+            grayscale=False,
+            size=None,
+            transparent=False,
+            use_pdftocairo=True,
+            thread_count=4
+        )
+       
+        for i, image in enumerate(images):
+            left, top, right, bottom = find_content_bounds(image)
+            cropped_image = image.crop((left, top, right, bottom))
+            target_width = 2000
+            aspect_ratio = cropped_image.size[1] / cropped_image.size[0]
+            target_height = int(target_width * aspect_ratio)
+           
+            resized_image = cropped_image.resize(
+                (target_width, target_height),
+                Image.Resampling.LANCZOS
+            )
+            output_file = os.path.join(output_dir, f'page_{i+1}.png')
+            resized_image.save(
+                output_file,
+                'PNG',
+                optimize=True,
+                quality=100
+            )
+           
+            image_paths.append(output_file)
+            
+        return image_paths
+    except Exception as e:
+        print(e)
+        return []
+
+
+```
+
+Result:
 
 <img src="/images/before_after.png" alt="Image Pre-processing" className="border border-zinc-200 rounded-xl p-2" width={"100%"} height={"auto"} loading="lazy" />
 
@@ -84,6 +169,8 @@ This hybrid approach provides:
 - More flexible processing capabilities
 - Faster development time
 - Improved handling of complex documents
+
+Note: If you are using OpenAI api for extraction beaware of token limits of the model you are using. You can read it on their api documentation page.
 
 ## Conclusion
 
