@@ -1,5 +1,7 @@
 import Container from "@/components/shared/container";
 import type { Metadata } from "next";
+import Image from 'next/image';
+import arduino from "public/images/arduino.png"
 
 export const metadata: Metadata = {
   title: "Work",
@@ -127,8 +129,17 @@ export default function Work() {
         </h2>
         <ul>
           <li>
-            Learnt arduino myself and built projects. Really enjoyed the robotics.
+            Learnt arduino by myself and built projects. Really enjoyed the robotics.
           </li>
+          <div className="flex justify-center">
+            <Image 
+              src={arduino.src} 
+              alt="Arduino project" 
+              width={400}
+              height={200}
+              className="rounded-lg"
+            />
+          </div>
           <li>
             Built full stack website for school competatiton with using PHP and templates for frontend.
           </li>
