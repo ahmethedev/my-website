@@ -1,0 +1,98 @@
+---
+title: "ClickHouse: A Month-Long Journey"
+publishedAt: "2025-01-21"
+summary: "Exploring ClickHouse: An incredibly fast OLAP database system for big data analysis"
+---
+
+![ClickHouse Columnar Store](https://chistadata.com/wp-content/uploads/2024/02/clickhouse-columnar-store.png)
+
+After spending years working with traditional databases like PostgreSQL, SQL Server, and MongoDB, I recently had the opportunity to explore ClickHouse. What I discovered was fascinating enough to share my experiences.
+
+## What is ClickHouse?
+
+ClickHouse is an open-source Online Analytical Processing (OLAP) database management system designed for big data analysis and data warehousing. The company behind it makes a bold claim: to be faster than any other DBMS in the market. After my experience, I can say there might be merit to this claim.
+
+## The Secret Sauce: Column-Based Processing
+
+The key differentiator of ClickHouse lies in its column-based processing mechanism. While conventional database systems operate on row-based processing (meaning they process all columns in a table for each query), ClickHouse takes a different approach. It only processes the specific columns required for your query, significantly reducing unnecessary data processing and improving query performance.
+
+## Storage Engines: Flexibility Meets Performance
+
+One of ClickHouse's most powerful features is its variety of storage engines, each designed for different use cases. Let's explore the three main options:
+
+### 1. MergeTree Engine
+
+This is your traditional disk-based storage option, similar to PostgreSQL. It's ideal for permanent data storage and provides a good balance between performance and durability.
+
+```sql
+CREATE TABLE events (
+    event_date Date,
+    user_id UInt32,
+    event_type String
+) ENGINE = MergeTree()
+ORDER BY (event_date, user_id);
+```
+
+### 2. Memory Engine
+
+Think of this as Redis-like storage - all data resides in memory. While it offers the lowest latency and highest performance, the trade-off is data persistence: your data vanishes upon server restart.
+
+```sql
+CREATE TABLE cache_table (
+    id UInt32,
+    data String
+) ENGINE = Memory;
+```
+
+### 3. Buffer Engine
+
+This hybrid approach combines both disk and memory storage, offering a balanced solution for specific use cases.
+
+```sql
+CREATE TABLE buffer_table AS disk_table
+ENGINE = Buffer(database, disk_table, 16, 10, 100, 10000, 1000000, 10000000, 100000000);
+```
+
+## The Dictionary Feature
+
+ClickHouse also offers a powerful Dictionary structure that's worth highlighting:
+
+```sql
+CREATE DICTIONARY user_dict (
+    user_id UInt32,
+    user_name String
+)
+PRIMARY KEY user_id
+SOURCE(CLICKHOUSE(TABLE 'users'))
+LIFETIME(300)
+LAYOUT(FLAT());
+```
+
+This feature maintains frequently accessed reference data in memory with automatic refresh capabilities. You can store your source data on disk using MergeTree while keeping frequently accessed portions in memory through Dictionaries.
+
+## Real-World Performance Comparison
+
+The numbers speak for themselves:
+
+- With identical tables containing 253 million rows, a query involving three JOINs took:
+  - SQL Server: 2 minutes
+  - ClickHouse: 2 seconds
+
+- Data casting operation (STG to Core table):
+  - 512 million rows
+  - 34 columns
+  - Completion time: approximately 10 minutes
+
+## When to Use ClickHouse
+
+ClickHouse excels in analytical scenarios where you need fast query performance on large datasets. However, it's important to note that it might not be the best choice if your use case involves:
+
+- Frequent updates to existing data
+- Regular insertion of new records
+- Traditional OLTP workloads
+
+## Final Thoughts
+
+My month with ClickHouse has been eye-opening. While it's not a one-size-fits-all solution, it's an incredibly powerful tool for analytical workloads. The performance gains are substantial enough to warrant serious consideration for any data warehouse or analytical project.
+
+For teams dealing with large-scale data analysis, the column-based approach combined with flexible storage engines makes ClickHouse a compelling choice. Just remember to carefully evaluate your specific use case before making the switch.

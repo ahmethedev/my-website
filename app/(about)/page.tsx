@@ -3,8 +3,8 @@ import Social from "@/components/social";
 
 export default function About() {
   const paragraphs = [
-    `Seasoned software enthusiast with a diverse background full-stack web development and machine learning. 
-    Currently focusing on Machine Learning.`,
+    `Seasoned software enthusiast with a diverse background full-stack web development and Infrastructure. 
+    Currently focusing on Infrastructure and Platform Engineering.`,
     `Driven by a love for software development and data, I thrive on building new products that solve real-world problems.
     I have a passion for building products and making analysis that make a difference and give insights about the world.`,
   ];
