@@ -19,20 +19,16 @@ export default function Work() {
         </p>
         <ul>
           <li>
-            Built a scraper to extract data from various sources, including
-            websites.
+          Designed and implemented complete system architecture for an OCR-based document processing pipeline, including error handling, data flow, storage strategies, and database schema design, handling 100K+ daily records with 99.9% uptime.
           </li>
           <li>
-            Developed a data pipeline for scraping, exporting, and loading data
-            into databases.
+          Led development of intelligent document processing system reducing manual data entry by 90%, incorporating machine learning for automated analysis
           </li>
           <li>
-            Took an active role in the DevOps processes for product deployment
-            and management.
+          Improved data processing speed by 70% through implementing parallel processing algorithms and optimizing resource utilization.
           </li>
           <li>
-            Used machine learning models for the semantic analysis of text data
-            and improve the accuracy of the data.
+          Established CI/CD workflows using Azure DevOps, managing code reviews and maintaining high code quality standards
           </li>
         </ul>
       </div>

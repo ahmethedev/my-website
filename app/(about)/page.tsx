@@ -3,10 +3,9 @@ import Social from "@/components/social";
 
 export default function About() {
   const paragraphs = [
-    `Seasoned software enthusiast with a diverse background full-stack web development and Infrastructure. 
-    Currently focusing on Infrastructure and Platform Engineering.`,
-    `Driven by a love for software development and data, I thrive on building new products that solve real-world problems.
-    I have a passion for building products and making analysis that make a difference and give insights about the world.`,
+    `Software Engineer specializing in large-scale data processing systems and full-stack development. 
+Background in autonomous vehicle systems and sensor fusion, combining academic research with practical engineering. Skilled in full stack development with expertise in system design and DevOps practices.
+Currently focused on developing enterprise-scale data processing solutions.`
   ];
 
   return (
