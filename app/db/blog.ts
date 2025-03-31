@@ -5,6 +5,7 @@ type Metadata = {
   title: string;
   publishedAt: string;
   summary: string;
+  keywords: string[];
   image?: string;
 };
 
@@ -20,7 +21,13 @@ function parseFrontmatter(fileContent: string) {
     let [key, ...valueArr] = line.split(": ");
     let value = valueArr.join(": ").trim();
     value = value.replace(/^['"](.*)['"]$/, "$1"); // Remove quotes
-    metadata[key.trim() as keyof Metadata] = value;
+    if (key.trim() === "keywords") {
+      (metadata as Metadata)[key.trim()] = value
+        .split(",")
+        .map((k) => k.trim());
+    } else {
+      (metadata as Metadata)[key.trim()] = value;
+    }
   });
 
   return { metadata: metadata as Metadata, content };
@@ -36,8 +43,8 @@ function readMDXFile(filePath) {
 }
 
 function getReadingTime(content) {
-  const wordsPerMinute = 400; // Average reading speed
-  const imageReadingTime = 1; // Estimated reading time for an image
+  const wordsPerMinute = 200; // Average reading speed
+  const imageReadingTime = 12; // Estimated reading time for an image
   const punctuationReadingTime = 0.05; // Estimated reading time for punctuation
 
   const wordCount = content.split(" ").length;

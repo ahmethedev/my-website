@@ -1,29 +1,53 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Coffee } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { highlight } from "sugar-high";
+import { CopyCode } from "./copy-code";
+import { ExpandableCode } from "./expandable-code";
 
 function Table({ data }) {
   let headers = data.headers.map((header, index) => (
-    <th key={index}>{header}</th>
+    <th
+      key={index}
+      className="border-b border-neutral-200 dark:border-neutral-800
+        bg-secondary dark:bg-secondary/50
+        px-4 py-2 text-left
+        text-sm font-semibold text-secondary-foreground dark:text-secondary-foreground
+        first:pl-6 last:pr-6 whitespace-nowrap"
+    >
+      {header}
+    </th>
   ));
+
   let rows = data.rows.map((row, index) => (
-    <tr key={index}>
+    <tr
+      key={index}
+      className="group transition-colors hover:bg-muted/50 dark:hover:bg-muted/50 text-start tracking-wide"
+    >
       {row.map((cell, cellIndex) => (
-        <td key={cellIndex}>{cell}</td>
+        <td
+          key={cellIndex}
+          className="border-b border-neutral-200 dark:border-neutral-800
+            px-4 py-2 text-xs text-muted-foreground
+            first:pl-6 last:pr-6"
+        >
+          {cell}
+        </td>
       ))}
     </tr>
   ));
 
   return (
-    <table>
-      <thead>
-        <tr>{headers}</tr>
-      </thead>
-      <tbody>{rows}</tbody>
-    </table>
+    <div className="not-prose relative my-4 overflow-hidden rounded-lg border border-border bg-card overflow-x-auto">
+      <table className="w-full border-collapse m-0">
+        <thead>
+          <tr>{headers}</tr>
+        </thead>
+        <tbody className="divide-y divide-border">{rows}</tbody>
+      </table>
+    </div>
   );
 }
 
@@ -51,9 +75,11 @@ function RoundedImage(props) {
 
 function Callout(props) {
   return (
-    <div className="px-4 py-3 border border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 rounded p-1 text-sm flex items-center text-neutral-900 dark:text-neutral-100 mb-8">
-      <div className="flex items-center w-4 mr-4">{props.emoji}</div>
-      <div className="w-full callout">{props.children}</div>
+    <div className="my-4 text-xs flex items-start">
+      <div className="flex items-center w-4 mr-4">↪</div>
+      <div className="w-full callout text-muted-foreground tracking-tight">
+        {props.children}
+      </div>
     </div>
   );
 }
@@ -145,8 +171,34 @@ function LinkCard({ title, link }) {
 }
 
 function Code({ children, ...props }) {
+  if (typeof children === "string" && !children.includes("\n")) {
+    return <code {...props}>{children}</code>;
+  }
+
   let codeHTML = highlight(children);
-  return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />;
+  const isLongCode = children.split("\n").length > 15;
+
+  const codeBlock = (
+    <pre className="!border-none">
+      <code dangerouslySetInnerHTML={{ __html: codeHTML }} />
+    </pre>
+  );
+
+  const wrappedCode = (
+    <div className="bg-zinc-50 dark:bg-neutral-950 rounded-lg">
+      <CopyCode code={children} className="p-4">
+        {codeBlock}
+      </CopyCode>
+    </div>
+  );
+
+  if (isLongCode) {
+    return (
+      <ExpandableCode className="prose-pre:my-0">{wrappedCode}</ExpandableCode>
+    );
+  }
+
+  return wrappedCode;
 }
 
 function slugify(str) {
@@ -180,29 +232,44 @@ function createHeading(level) {
   return Component;
 }
 
-let components = {
+interface BuyMeACoffeeProps {
+  username: string;
+}
+
+export function BuyMeACoffee({ username }: BuyMeACoffeeProps) {
+  return (
+    <div className="not-prose my-8 flex items-center justify-center">
+      <Link
+        href={`https://buymeacoffee.com/${username}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-900 transition-colors hover:bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-50 dark:hover:bg-neutral-800"
+      >
+        <Coffee className="h-4 w-4" />
+        <span>support content</span>
+      </Link>
+    </div>
+  );
+}
+
+const components = {
   h1: createHeading(1),
   h2: createHeading(2),
   h3: createHeading(3),
   h4: createHeading(4),
   h5: createHeading(5),
   h6: createHeading(6),
-  RoundedImage,
   a: CustomLink,
+  Image: RoundedImage,
   Callout,
   ProsCard,
   ConsCard,
   code: Code,
   Table,
   LinkCardList,
-  LinkCard,
+  BuyMeACoffee,
 };
 
-export function CustomMDX(props) {
-  return (
-    <MDXRemote
-      {...props}
-      components={{ ...components, ...(props.components || {}) }}
-    />
-  );
+export function CustomMDX({ source }: { source: string }) {
+  return <MDXRemote source={source} components={components} />;
 }

@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { getBlogPosts } from "@/app/db/blog";
+import Claps from "@/components/claps";
 import { CustomMDX } from "@/components/mdx";
-import { formatDate } from "@/lib/utils";
+import TableOfContents from "@/components/table-of-contents";
+import { extractHeadings, formatDate } from "@/lib/utils";
+
+type Props = {
+  params: Promise<{ slug: string }>;
+};
 
 export async function generateMetadata({
   params,
-}): Promise<Metadata | undefined> {
-  let blog = getBlogPosts().find((blog) => blog.slug === params.slug);
+}: Props): Promise<Metadata | undefined> {
+  const { slug } = await params;
+  const blog = getBlogPosts().find((blog) => blog.slug === slug);
+
   if (!blog) {
     return;
   }
@@ -18,12 +26,19 @@ export async function generateMetadata({
     title,
     publishedAt: publishedTime,
     summary: description,
+    keywords,
   } = blog.metadata;
-  let ogImage = `https://abd.im/logo.svg`;
+
+  let ogImage =
+    new URL(
+      "/opengraph-image",
+      process.env.NEXT_PUBLIC_APP_URL || "https://abd.im"
+    ).toString() + `?title=${encodeURIComponent(title)}`;
 
   return {
     title,
     description,
+    keywords,
     openGraph: {
       title,
       description,
@@ -33,20 +48,19 @@ export async function generateMetadata({
       images: [
         {
           url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: title,
         },
       ],
-    },
-    twitter: {
-      card: "player",
-      title,
-      description,
-      images: [ogImage],
     },
   };
 }
 
-export default function BlogDetailPage({ params }) {
-  const blog = getBlogPosts().find((blog) => blog.slug === params.slug);
+export default async function BlogDetailPage({ params }: Props) {
+  const { slug } = await params;
+  const blog = getBlogPosts().find((blog) => blog.slug === slug);
+  const headings = blog ? extractHeadings(blog.content) : [];
 
   if (!blog) {
     notFound();
@@ -71,7 +85,7 @@ export default function BlogDetailPage({ params }) {
             url: `https://abd.im/blog/${blog.slug}`,
             author: {
               "@type": "Person",
-              name: "Ahmet Burak Dinc",
+              name: "Onurhan Demir",
             },
           }),
         }}
@@ -90,9 +104,12 @@ export default function BlogDetailPage({ params }) {
           </p>
         </Suspense>
       </div>
+      <TableOfContents headings={headings} />
       <article className="prose prose-quoteless prose-neutral dark:prose-invert text-justify w-auto">
         <CustomMDX source={blog.content} />
       </article>
+
+      <Claps key={blog.slug} />
     </section>
   );
 }

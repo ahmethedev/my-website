@@ -128,13 +128,6 @@ export default function Work() {
             Learnt arduino by myself and built projects. Really enjoyed the robotics.
           </li>
           <div className="flex justify-center">
-            <Image 
-              src={arduino.src} 
-              alt="Arduino project" 
-              width={400}
-              height={200}
-              className="rounded-lg"
-            />
           </div>
           <li>
             Built full stack website for school competatiton with using PHP and templates for frontend.

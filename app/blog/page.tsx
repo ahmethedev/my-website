@@ -1,14 +1,12 @@
-import { Fragment } from "react";
-import type { Metadata } from "next";
-
-import { getBlogPosts } from "../db/blog";
+import Pagination from "@/components/pagination";
 import Container from "@/components/shared/container";
-import Separator from "@/components/shared/separator";
-import { BlogCard } from "@/components/blog-card";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { getBlogPosts } from "../db/blog";
 
 export const metadata: Metadata = {
   title: "Blog",
-  description: "Read my thoughts on Infrasturcture, data, and more.",
+  description: "Read my thoughts on software development, design, and more.",
 };
 
 export default function Blog() {
@@ -16,21 +14,9 @@ export default function Blog() {
 
   return (
     <Container size="large">
-      {allBlogs
-        .sort((a, b) => {
-          if (
-            new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)
-          ) {
-            return -1;
-          }
-          return 1;
-        })
-        .map((blog, index, array) => (
-          <Fragment key={blog.slug}>
-            <BlogCard blog={blog} />
-            {index !== array.length - 1 && <Separator />}
-          </Fragment>
-        ))}
+      <Suspense fallback={<div>Loading...</div>}>
+        <Pagination allBlogs={allBlogs} />
+      </Suspense>
     </Container>
   );
 }

@@ -10,7 +10,7 @@ import { ModeToggle } from "./ui/theme-toggle";
 const NAV_ITEMS = {
   about: "/",
   blog: "/blog",
-  cv: "/work",
+  work: "/work",
 };
 
 export const Header = () => {
@@ -23,6 +23,18 @@ export const Header = () => {
           className="flex flex-col fade items-center md:items-start justify-start py-8 tracking-tight w-full sm:pr-0 md:pr-6 lg:pr-0"
           aria-label="Main navigation"
         >
+          <div className="flex flex-row items-center">
+            <Link href="/">
+              <Image
+                src="/images/linkedinpfp.png"
+                alt="Logo"
+                width={150}
+                height={150}
+                priority={true}
+                className="rounded-full"
+              />
+              <span className="sr-only">Ahmet Burak Dinc</span>
+            </Link>
 
             <div className="flex flex-col ml-4">
               <span className="text-medium inline-block font-medium">
@@ -30,7 +42,7 @@ export const Header = () => {
               </span>
               <span className="opacity-60">software engineer</span>
             </div>
-    
+          </div>
 
           <div className="flex flex-row items-center justify-between sm:justify-end w-full mt-8 sm:mt-4 mb-0 sm:mb-4 tracking-tight">
             <div className="inline-flex items-center">

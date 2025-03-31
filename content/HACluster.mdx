@@ -1,0 +1,250 @@
+---
+title: "How to Set Up an On-Prem HA Cluster Setup with Keepalived and MetalLB"
+publishedAt: "2025-03-31"
+summary: "Full Guide For Setting Up HA Cluster"
+---
+
+# How to Set Up an On-Prem HA Cluster Setup with Keepalived and MetalLB
+
+## Disclaimer
+This guide covers the steps for creating an on-premises Kubernetes cluster specifically for Ubuntu-based systems. If your machines are running any OS other than Ubuntu you might consider stopping reading.
+
+## Introduction
+Scaling applications effectively is a crucial part of your business. In most cases, major cloud providers like AWS, GCP, and Azure have robust tools that help you scale your application. However in some scenarios, like mine, you might not have access to these cloud providers because of data privacy. Thus, in order to deploy and scale your application you will need on-prem cluster initialization. In this article, we will walk through how to set up an on-prem HA (High Availability) Kubernetes Cluster using Keepalived for control plane redundancy and MetalLB for load balancing services.
+
+## Table of Contents
+- [Setting up your machines for the On-Prem Kubernetes Cluster](#setting-up-your-machines-for-the-on-prem-kubernetes-cluster)
+- [Setting up Keepalived and Creating Cluster with VIP](#creating-cluster-with-keepalived-vip)
+- [Setting up MetalLB](#setting-up-metallb)
+- [Conclusion](#conclusion)
+
+## Setting up your machines for the On-Prem Kubernetes Cluster
+
+### Turning the swap off
+
+Kubernetes watches the memory usage of the nodes and the pods in them. While the swap is on, Kubernetes might make some miscalculations about memory usage which leads to inefficiency in managing the Cluster.
+
+You can turn the swap off by using a simple command:
+
+```bash
+swapoff -a
+```
+
+To make this change permanent you should edit the `/etc/fstab` file and comment out the line that starts with 'swap'.
+
+### Getting the Containerd ready
+
+Kubernetes manages containers in pods. To manage containers it needs Container Runtime. Containerd is one of the popular container runtime tools like Docker and CRI-O.
+
+When Containerd is compared to Docker, it has more simplicity and efficiency.
+
+#### Install Containerd  
+
+```bash
+sudo apt-get install containerd
+```
+
+This command will install the Containerd packages and start the containerd service. You can check if the Containerd service is running:
+
+```bash
+sudo systemctl status containerd
+```
+
+You should see the containerd service active and running. However, this is not enough for us to use the containerd along with our Kubernetes cluster.
+
+#### Create containerd config.toml 
+
+```bash
+sudo mkdir -p /etc/containerd
+sudo containerd config default > /etc/containerd/config.toml
+```
+
+These two commands will create a config file for your containerd service.
+
+Now we are going to edit the config file for our cluster initialization.
+
+```bash
+sed -i 's/SystemdCgroup = false/SystemdCgroup = true/g' /etc/containerd/config.toml
+```
+
+This command will set SystemCgroup true which comes as false by default. Kubernetes needs SystemCgroup to be turned on in order to manage containers.
+
+> **Tip**: Also check if the Disable Plugins section on this config file has no value "cri".
+
+Now you can restart your containerd service. 
+
+```bash
+sudo systemctl restart containerd
+sudo systemctl enable containerd
+```
+
+Then check if it is running. 
+
+```bash
+sudo systemctl status containerd
+```
+
+### Install Kubelet, Kubeadm, Kubectl
+
+Before installing these Kubernetes tools let's have a look and explain what they are and why we need them.
+
+#### Kubelet
+
+Kubelet is an agent that works on Kubernetes nodes and manages the lifecycle of pods and the containers running in them. It has a critical role in Cluster management. What does Kubelet do?
+- Start and stop pods
+- Control the containers in pods
+- Report the pod and node situations to the Kubernetes API.
+
+#### Kubectl
+
+Kubectl is a command line tool that helps you manage Kubernetes resources like Pods, services, and configmaps.
+
+#### Kubeadm
+
+Kubeadm is a command line tool that helps you initialize and scale your Kubernetes cluster.
+
+To install these tools:
+
+```bash
+sudo apt update
+sudo apt install -y apt-transport-https ca-certificates curl
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+sudo touch /etc/apt/sources.list.d/kubernetes.list
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+sudo apt update
+sudo apt install -y kubelet kubeadm kubectl
+sudo systemctl enable kubelet
+```
+
+Check the installation:
+
+```bash
+kubectl --version
+```
+
+> **Tip**: When you check the status of the Kubelet services it might be inactive or crashloop which is okay at that point. Kubeadm will take care of the missing components that make the Kubelet active and running.
+
+### Some other configurations
+
+To set up the Kubernetes cluster properly we should make some configurations including kernel modules and networking configurations.
+
+```bash
+cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
+cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.ipv4.ip_forward                 = 1
+EOF
+
+sudo modprobe overlay
+sudo modprobe br_netfilter
+
+systemctl daemon-reload
+
+systemctl restart containerd
+```
+
+That is it! Our machine is now ready to initialize the Kubernetes cluster.
+
+## Creating Cluster with Keepalived VIP 
+
+In my case, we have 3 control plane nodes and to prevent some disaster we need to keep our cluster alive. Keepalived is a tool that provides High availability for your services. In essence, you create a VIP pool with available an IP address on your IP block and you set the Keepalived up on your nodes. One node becomes the master and the others the backup. When something unwanted happens to the master keepalived pod the VIP address you created is passed to the Backup node and the backup node turns itself into the Master node. You can decide which backup node has higher priority to claim the master node by setting the priority score on the keepalived manifest file.
+
+And just like that by creating your Kubernetes cluster with the control-plane endpoint with VIP you have just set up you can create a high-availability cluster.
+
+```bash
+sudo kubeadm init --control-plane-endpoint="<IP>:6443" --upload-certs --pod-network-cidr=10.244.0.0/16
+```
+
+> **Note**: To create your cluster with VIP control-plane endpoint you need to deploy your Keepalived pods as Static pods. After setting up your cluster you can check your network if the VIP is available:
+
+```bash
+ip a
+```
+
+## Setting up MetalLB
+
+After we initialized our cluster and joined our other worker and control-plane nodes now, we can set up a load-balancer.
+
+MetalLB is open-source software that provides load-balancing services for on-prem clusters. When you use cloud providers, these load-balancing services are provided by them, but in our case, we are setting up an on-prem cluster. If we want to build high-availability services with higher uptime within a high-availability cluster, we might need load-balancing. After setting up MetalLB we will be able to provide external IP for our Load-Balancer type of services.
+
+> **Note**: You must have at least one worker node in your cluster to set up MetalLB.
+
+### Pre-Flight Configurations
+
+```bash
+kubectl edit configmap -n kube-system kube-proxy
+```
+
+Change the configuration to:
+
+```yaml
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: "ipvs"
+ipvs:
+  strictARP: true
+```
+
+### Setting Up MetalLB
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
+
+kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
+
+kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.14.9/config/manifests/metallb-native.yaml
+
+kubectl get pods -n metallb-system
+```
+
+Now let's create the IP address pool:
+
+```bash
+cat <<EOF > metallb-ipaddresspool.yaml
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: metallb-system
+spec:
+  addresses:
+  - 10.3.95.100-10.3.95.150  # Set an available IP range from your IP block.
+EOF
+
+kubectl apply -f metallb-ipaddresspool.yaml
+```
+
+And set up the L2 advertisement:
+
+```bash
+cat <<EOF > metallb-l2advertisement.yaml
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: l2-advert
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+  - first-pool
+EOF
+
+kubectl apply -f metallb-l2advertisement.yaml
+```
+
+### Check the result
+
+```bash
+kubectl get pods -n metallb-system
+```
+
+All pods should be up and running.
+
+## Conclusion
+By using Keepalived and MetalLB we have created a High-Availability Kubernetes Cluster. We have used VIP to set up our control plane and created Backup nodes for any cases. We have also set up MetalLB for our LoadBalancer type of services. Now you are able to deploy your pods and enjoy the high availability of your services.
+
+export default ({ children }) => <div>{children}</div>;
