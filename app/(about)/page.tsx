@@ -53,6 +53,19 @@ export default function About() {
         </div>
       ))}
       <Social />
+      <hr className="my-8" />
+      <div className="my-8">
+        <div className="aspect-video">
+          <iframe
+            src="https://www.youtube.com/embed/kYfNvmF0Bqw"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            className="w-full h-full"
+          ></iframe>
+        </div>
+      </div>
       <Script
         id="structured-data"
         type="application/ld+json"
