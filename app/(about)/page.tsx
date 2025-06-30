@@ -9,7 +9,7 @@ const structuredData = {
   jobTitle: "Software Engineer",
   worksFor: {
     "@type": "Organization",
-    name: "Datateam",
+    name: "",
   },
   url: "https://abd.im",
   sameAs: [
@@ -20,11 +20,8 @@ const structuredData = {
 export default function About() {
   const paragraphs = [
     <>
-      As a Software Engineer at{" "}
-      <span className="font-medium decoration-wavy underline decoration-from-font text-emerald-950 decoration-emerald-500 dark:text-emerald-50 dark:decoration-emerald-400 tracking-tight">
-        Datateam
-      </span>
-      , Software Engineer specializing in large-scale data processing systems and full-stack development. Background in autonomous vehicle systems and sensor fusion, combining academic research with practical engineering. Skilled in full stack development with expertise in system design and DevOps practices. Currently focused on developing enterprise-scale data processing solutions.
+Software Engineer specializing in Machine Learning and Quantative Analysis. 
+Currently focused on developing deep learning models and quantitative strategies. I love computers and candle sticks.
     </>
   ];
 
