@@ -26,7 +26,7 @@ export const Header = () => {
           <div className="flex flex-row items-center">
             <Link href="/">
               <Image
-                src="/images/linkedinpfp.png"
+                src="/images/linkedinpfp.jpeg"
                 alt="Logo"
                 width={150}
                 height={150}
