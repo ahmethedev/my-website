@@ -43,8 +43,8 @@ function readMDXFile(filePath) {
 }
 
 function getReadingTime(content) {
-  const wordsPerMinute = 200; // Average reading speed
-  const imageReadingTime = 12; // Estimated reading time for an image
+  const wordsPerMinute = 300; // Average reading speed
+  const imageReadingTime = 1; // Estimated reading time for an image
   const punctuationReadingTime = 0.05; // Estimated reading time for punctuation
 
   const wordCount = content.split(" ").length;
