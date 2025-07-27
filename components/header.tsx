@@ -26,10 +26,10 @@ export const Header = () => {
           <div className="flex flex-row items-center">
             <Link href="/">
               <Image
-                src="/images/linkedinpfp.jpeg"
+                src="/images/linkedinpfp.png"
                 alt="Logo"
-                width={150}
-                height={150}
+                width={100}
+                height={100}
                 priority={true}
                 className="rounded-full"
               />
