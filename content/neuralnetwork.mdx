@@ -1,0 +1,194 @@
+---
+title: "Creating a Neural Network From Scratch"
+publishedAt: "2025-07-27"
+summary: "Building a neural network from scratch with code examples using the Titanic dataset"
+---
+
+<img src="/images/neuralnet.jpg" alt="Neural Network Cover" className="border border-zinc-200 rounded-xl p-2" width="100%" height="auto" loading="lazy" />
+
+# Creating a Neural Network From Scratch
+
+Last week, I explained [how a machine learns](https://www.abd.im/blog/machinelearning) and introduced the theoretical side of machine learning. In this blog post, we will follow the steps to create a neural network from scratch with code examples, and at the end of the post, you will learn the required steps before making a submission at Kaggle.
+
+In the world of machine learning or AI, data is the fuel for your rocket. Without enough or properly refined fuel, your rocket will crash to the ground. So, the first step of creating a neural network is getting the data.
+
+## 1) Get the Data
+
+For Kaggle contexts, the data is provided for creators, so we don't need to worry about obtaining data. In this article, I'll be using the classic Titanic dataset.
+
+As I mentioned earlier, our fuel needs to be properly refined to achieve full performance.
+
+## 2) Cleaning the Data
+
+First, we need to check null values in our dataset:
+
+```python
+df.isna().sum()
+```
+
+We don't want null values—or air bubbles—in our fuel. To keep things running smoothly, we replace them with meaningful values, such as the column means:
+
+```python
+modes = df.mode().iloc[0]
+df.fillna(modes, inplace=True)
+```
+
+The next step is checking the numerical data of the dataset. We do not want really big values to dominate our results. There are several ways to check the data, but the most conventional way is to use histograms:
+
+```python
+df['Fare'].hist()
+```
+
+We need to avoid big values, a.k.a. long tails on histograms. To avoid long tails, we can use the well-known log function from math.
+
+> **P.S.** Log function compresses large values, reducing long tails in distributions.
+
+```python
+df['LogFare'] = np.log(df['Fare'] + 1)
+```
+
+> **P.S.** The + 1 is for the log0 case.
+
+## 3) Check the Non-numeric Values
+
+I am not going to explain and bore you with the classical "In the computer world, everything is 0s and 1s." But as you remember, in my latest article, we cannot multiply strings for a gradient. So, we need to convert our non-numeric values into numerical values.
+
+Find columns that include non-numeric values:
+
+```python
+df.describe(include=[object])
+```
+
+Create dummies for these columns. This function converts categorical columns into numerical one-hot encoded columns so that machine learning models can process them.
+
+```python
+df = pd.get_dummies(df, columns=["Sex", "Pclass"])
+```
+
+Check the new columns:
+
+```python
+df.columns
+added_cols = ["Sex_male", "Sex_female", "Pclass_1", "Pclass_2", ...]
+```
+
+Well done, we have cleaned our data, avoided air bubbles, and we are ready to build our rocket.
+
+## 4) Create Tensors
+
+We need to have 2 tensors, independent and dependent. Independent tensors represent input values of our neural network, and the dependent tensor represents the output of the neural network.
+
+```python
+t_dep = torch.tensor(df["Survived"].values, dtype=torch.float)
+
+indep_cols = ["Age", "LogFare", ...] + added_cols
+t_indep = torch.tensor(df[indep_cols].values, dtype=torch.float)
+```
+
+## 5) Create Coefficients, a.k.a. Weights
+
+```python
+torch.manual_seed(42)
+n_coeffs = t_indep.shape[1] # feature count
+coeffs = torch.rand(n_coeffs) * 0.5
+```
+
+## 6) The First Multiplication
+
+```python
+t_indep * coeffs
+```
+
+We have to be careful at that step; big values might dominate our results. Make all columns contain numbers from 0 to 1, where 0 means not survived and 1 means survived.
+
+For our model, we are going to divide them by their max values:
+
+```python
+vals, indices = t_indep.max(dim=0)
+```
+
+And once again:
+
+```python
+t_indep * coeffs
+```
+
+## 7) Create the First Prediction from Our Model
+
+To make a prediction, we are going to do "columns * coeffs" for every row (sample) and add them up:
+
+```python
+pred = (t_indep * coeffs).sum(dim=1)
+```
+
+Nice! Now we have a prediction based on our model, and now we are ready to calculate our loss.
+
+## 8) Determining Loss Function
+
+In order to do gradient descent, we need a loss function. Our loss function for this model is taking the average errors:
+
+```python
+loss = torch.abs(pred - t_dep).mean()
+```
+
+## 9) Gradient Descent
+
+Now, we have a prediction and a loss function. Everything is set up for doing the famous gradient descent step. I'll show how to make 1 epoch manually:
+
+```python
+coeffs.requires_grad_()  # enable gradient calculation 
+loss = calc_loss(coeffs, t_indep, t_dep) # calculate loss
+loss.backward() # Backpropagation
+print(coeffs.grad)
+
+# Gradient descent (learning rate 0.1)
+with torch.no_grad():
+    coeffs.sub_(coeffs.grad * 0.1) 
+    coeffs.grad.zero_()  # reset gradients (prepare for next epoch)
+print(calc_loss(coeffs, t_indep, t_dep))
+```
+
+## 10) Training the Linear Model
+
+First, split our test data into validation and test sets:
+
+```python
+train_val_df, test_df = train_test_split(df, test_size=0.2, random_state=42)
+train_df, val_df = train_test_split(train_val_df, test_size=0.2, random_state=42)
+```
+
+Then, do the gradient descent step several times:
+
+```python
+for epoch in range(epochs):
+    loss = calc_loss(coeffs, t_indep_train, t_dep_train)
+    loss.backward()
+    
+    with torch.no_grad():
+        coeffs.sub_(coeffs.grad * learning_rate)
+        coeffs.grad.zero_()
+    
+    if (epoch+1) % 10 == 0 or epoch == 0:
+        val_loss = calc_loss(coeffs, t_indep_val, t_dep_val)
+        print(f"Epoch {epoch+1}: Train Loss = {loss.item():.4f}, Val Loss = {val_loss.item():.4f}")
+```
+
+Finally, measure accuracy:
+
+```python
+with torch.no_grad():
+    pred_test = torch.sigmoid((t_indep_test * coeffs).sum(dim=1))
+    pred_labels = (pred_test >= 0.5).float()
+    accuracy = (pred_labels == t_dep_test).float().mean()
+    print(f"Test Accuracy: {accuracy.item()*100:.2f}%")
+```
+
+Some of our predictions might be bigger than 1 or less than 0; thus, we need to use a sigmoid to keep the predictions in the range of 0 and 1.
+
+## 11) Submit your model
+
+That's it! We have created a simple neural network from scratch for the Titanic dataset, and now we can make predictions on whether someone survived or not based on the given data.
+
+## Sources
+
+- [Fast.ai Course - Lesson 5](https://course.fast.ai/Lessons/lesson5.html)
