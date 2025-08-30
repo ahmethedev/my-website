@@ -20,7 +20,7 @@ const structuredData = {
 export default function About() {
   const paragraphs = [
     <>
-Software Engineer specializing in Machine Learning and Quantative Analysis. 
+Software Engineer specializing in Machine Learning and Quantitative Analysis. 
 Currently focused on developing deep learning models and quantitative strategies. I love computers and candle sticks.
     </>
   ];
