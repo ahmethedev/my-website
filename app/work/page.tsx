@@ -19,16 +19,13 @@ export default function Work() {
         </p>
         <ul>
           <li>
+          Played a key role in a large-scale data warehouse consolidation project processing 30B+ records, contributing to the development of custom ETL tools, database configuration, and system optimization. Collaborated on implementing comprehensive error handling, database installation, Kubernetes cluster setup, and distributed data management strategies, resulting in query performance improvement from 45 minutes to 1 minute.
+          </li>
+          <li>
           Designed and implemented complete system architecture for an OCR-based document processing pipeline, including error handling, data flow, storage strategies, and database schema design, handling 100K+ daily records with 99.9% uptime.
           </li>
           <li>
-          Led development of intelligent document processing system reducing manual data entry by 90%, incorporating machine learning for automated analysis
-          </li>
-          <li>
-          Improved data processing speed by 70% through implementing parallel processing algorithms and optimizing resource utilization.
-          </li>
-          <li>
-          Established CI/CD workflows using Azure DevOps, managing code reviews and maintaining high code quality standards
+          Built a dynamic API generation platform for a data warehouse with custom permissions, rate limiting, batch processing and OpenAPI-compliant documentation; handles 1k+ daily requests and provides request analytics via a dashboard.
           </li>
         </ul>
       </div>
@@ -39,22 +36,14 @@ export default function Work() {
           Collecteurs
         </h2>
         <p className="text-neutral-600 dark:text-neutral-400 text-sm">
-          Software engineer - part time, 2023 — 2024
+          Software engineer, 2022 — 2023
         </p>
-
         <ul>
           <li>
-            Worked as Smart Contract Developer, Designed and implemented an NFT
-            marketplace, allowing users to buy, sell, and trade digital art.
-          </li>
-
-          <li>
-            Collaborated with a cross-functional team to optimize the user
-            experience and ensure platform security.
+            Developed NFT marketplace enabling digital art trading, integrating blockchain for secure transaction processing.
           </li>
           <li>
-            Integrated blockchain technology to securely process transactions
-            and manage digital assets.
+            Optimized platform performance and security through cross-functional collaboration.
           </li>
         </ul>
       </div>
@@ -102,6 +91,39 @@ export default function Work() {
           </li>
         </ul>
       </div>
+
+      <div className="prose prose-neutral dark:prose-invert">
+        <hr className="my-6 border-neutral-200 dark:border-neutral-800" />
+        <h2 className="font-medium text-xl mb-1 tracking-tighter">Projects</h2>
+        
+        <h3 className="font-medium text-lg mb-1 tracking-tighter">Sensor Based Applications for Autonomous Vehicles</h3>
+        <ul>
+          <li>
+            Implemented ESEKF method for vehicle positioning using GNSS, LiDAR, and IMU sensor data; published research paper.
+          </li>
+          <li>
+            Built real-time motion tracking system processing multi-sensor data at 100Hz using Python, ROS, and Carla Simulator.
+          </li>
+        </ul>
+
+        <h3 className="font-medium text-lg mb-1 tracking-tighter">Data Scraping and Visualization Platform</h3>
+        <ul>
+          <li>
+            Scraped and processed 280,000 records from web sources, implementing comprehensive data cleaning and normalization procedures.
+          </li>
+          <li>
+            Developed full-stack web application with machine learning integration for data visualization, search functionality, and semantic grouping of similar content.
+          </li>
+        </ul>
+
+        <h3 className="font-medium text-lg mb-1 tracking-tighter">Monte Carlo Simulation based on Trading History</h3>
+        <ul>
+          <li>
+            Implemented a Monte Carlo simulation using historical trading data to project 1-year return distributions. Analyzed key performance metrics including win rate, loss ratio, and average return.
+          </li>
+        </ul>
+      </div>
+
       <div className="prose prose-neutral dark:prose-invert">
         <hr className="my-6 border-neutral-200 dark:border-neutral-800" />
         <h2 className="font-medium text-xl mb-1 tracking-tighter">
