@@ -1,0 +1,692 @@
+---
+title: "Scaling ClickHouse on a Kubernetes Cluster with Sharding and Replication"
+publishedAt: "2025-08-31"
+summary: "Set up Clickhouse Cluster with 2 Shards and 2 Replications "
+---
+
+<img src="https://clickhouse.com/docs/assets/ideal-img/both.e5ece96.1024.png" alt="ClickHouse Sharding and Replication Diagram" className="border border-zinc-200 rounded-xl p-2 mt-4" width="100%" height="auto" loading="lazy" />
+
+Building a data warehouse from scratch is a challenging task. You have to build a solid ETL pipeline, provide high-availability databases, and API endpoints, including batch processing and rate limiters.
+
+Data warehouses, by definition, are like dams. Several applications might depend on those warehouses, and any misfortune can cause disaster. I am not going any deeper into what data warehouses are like or how to build one. In this article, I am going to explain how you can scale your ClickHouse StatefulSets, which are the heart of the warehouse, on your Kubernetes cluster with sharding and replication.
+
+## What do Replication and Sharding Mean?
+
+**Replication** involves duplicating data across multiple servers by ensuring high availability and fault tolerance. On the other hand, **sharding** distributes large datasets across several servers to manage large volumes of data and handle high throughput operations.
+
+That sounds awesome, and it is exactly what we need for our data warehouse. Building a database that provides sharding and replication is not our concern for now. Most of the known database engines have sharding and replication support, for instance, Postgres Patroni Cluster. You should check their official docs about scaling. In our case, we are going to follow ClickHouse's official documentation for scaling. However, this guide is for a Dockerized setup. We apply these steps to a Kubernetes cluster.
+
+All set. Let's start.
+
+## 1. Setup ZooKeeper
+
+ZooKeeper is a centralized service for maintaining configuration information, naming, providing distributed synchronization, and providing group services. All of these kinds of services are used in some form or another by distributed applications.
+
+ZooKeeper is a crucial service for our case. We are planning a 4-pod system design for scaling ClickHouse as 2 pods for replication and 2 pods for sharding. Replication and sharding require high attention for data management. ClickHouse uses ZooKeeper to save metadata about the cluster, such as which node has which table, which data it has handled, and which has not yet, etc. Also, ZooKeeper plays a critical role in DDL tasks such as CREATE or UPDATE. If you run a DDL command in the clickhouse-0 node, the ZooKeeper task queue will execute the same DDL in clickhouse-1 and clickhouse-2 nodes synchronously. It also helps with the leader election for the cluster. As you can see, we use ZooKeeper for all distributed system requirements.
+
+### How to Set Up ZooKeeper on Your Kubernetes Cluster?
+
+Create a namespace for ZooKeeper:
+
+```bash
+kubectl create namespace zookeeper
+```
+
+Create ConfigMap for ZooKeeper:
+
+```yaml
+# zookeeper-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zookeeper-config
+  namespace: zookeeper
+data:
+  zoo.cfg: |
+    tickTime=2000
+    initLimit=30
+    syncLimit=10
+    dataDir=/data
+    dataLogDir=/datalog
+    clientPort=2181
+    maxClientCnxns=60
+    autopurge.snapRetainCount=3
+    autopurge.purgeInterval=1
+    4lw.commands.whitelist=*
+    server.1=zookeeper-0.zookeeper-headless.zookeeper.svc.cluster.local:2888:3888
+    server.2=zookeeper-1.zookeeper-headless.zookeeper.svc.cluster.local:2888:3888
+    server.3=zookeeper-2.zookeeper-headless.zookeeper.svc.cluster.local:2888:3888
+```
+
+Create a Headless Service for ZooKeeper:
+
+> **What is a Headless Service in Kubernetes?**
+> 
+> Kubernetes does not assign ClusterIP to headless services. These kinds of services return IP addresses for all pods with DNS resolution without load balancing. If we don't use a headless service, this service returns ClusterIP, which is an IP address for a single pod, and we cannot establish a connection among all pods.
+
+```yaml
+# zookeeper-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: zookeeper-headless
+  namespace: zookeeper
+spec:
+  clusterIP: None
+  selector:
+    app: zookeeper
+  ports:
+  - port: 2181
+    name: client
+  - port: 2888
+    name: follower
+  - port: 3888
+    name: election
+```
+
+Create ZooKeeper StatefulSet:
+
+```yaml
+# zookeeper-deployment.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper
+  namespace: zookeeper
+spec:
+  serviceName: zookeeper-headless
+  replicas: 1  
+  podManagementPolicy: OrderedReady  
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      containers:
+      - name: zookeeper
+        image: zookeeper:3.8
+        ports:
+        - containerPort: 2181
+          name: client
+        - containerPort: 2888
+          name: follower
+        - containerPort: 3888
+          name: election
+        
+        env:
+        - name: ZOO_LOG4J_PROP
+          value: "INFO,CONSOLE"
+        
+        command:
+        - bash
+        - -c
+        - |
+          set -ex
+          
+          # Get pod number
+          POD_NUM=$(echo $HOSTNAME | grep -o '[0-9]*$')
+          ZK_ID=$((POD_NUM + 1))
+          echo "=== Starting ZooKeeper Server ID: $ZK_ID on $HOSTNAME ==="
+          
+          # Create directories
+          mkdir -p /data /datalog
+          
+          # Create myid file
+          echo $ZK_ID > /data/myid
+          echo "myid: $(cat /data/myid)"
+          
+          # Copy zoo.cfg 
+          cp /config-template/zoo.cfg /conf/zoo.cfg
+          echo "=== zoo.cfg content ==="
+          cat /conf/zoo.cfg
+          echo "======================="
+          
+          if [ $ZK_ID -eq 1 ]; then
+            echo "Starting first ZooKeeper node..."
+          else
+            echo "Starting additional ZooKeeper node..."
+            # Wait for other nodes' DNS
+            for i in $(seq 0 $((POD_NUM-1))); do
+              echo "Waiting for zookeeper-$i DNS resolution..."
+              until nslookup zookeeper-$i.zookeeper-headless.zookeeper.svc.cluster.local; do
+                echo "DNS not ready for zookeeper-$i, waiting..."
+                sleep 3
+              done
+              echo "zookeeper-$i DNS resolved"
+            done
+          fi
+          
+          echo "Starting ZooKeeper server..."
+          exec zkServer.sh start-foreground
+        
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: datalog
+          mountPath: /datalog
+        - name: config
+          mountPath: /config-template
+        
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        
+        livenessProbe:
+          exec:
+            command:
+            - bash
+            - -c
+            - |
+              set -e
+              result=$(echo "ruok" | nc localhost 2181 2>/dev/null || echo "failed")
+              if [ "$result" = "imok" ]; then
+                exit 0
+              else
+                echo "ZooKeeper health check failed: $result"
+                exit 1
+              fi
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        
+        readinessProbe:
+          exec:
+            command:
+            - bash
+            - -c
+            - |
+              set -e
+              result=$(echo "ruok" | nc localhost 2181 2>/dev/null || echo "failed")
+              if [ "$result" = "imok" ]; then
+                exit 0
+              else
+                echo "ZooKeeper readiness check failed: $result"
+                exit 1
+              fi
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+     
+      volumes:
+      - name: config
+        configMap:
+          name: zookeeper-config
+  
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "nfs-client"
+      resources:
+        requests:
+          storage: 5Gi
+  - metadata:
+      name: datalog
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "nfs-client"
+      resources:
+        requests:
+          storage: 2Gi
+```
+
+Apply the ZooKeeper configuration:
+
+```bash
+kubectl apply -f zookeeper-configmap.yaml
+kubectl apply -f zookeeper-headless.yaml
+kubectl apply -f zookeeper-deployment.yaml
+```
+
+Wait until the first pod is ready:
+
+```bash
+kubectl get pods -n zookeeper -w
+```
+
+Test the first pod:
+
+```bash
+kubectl exec -n zookeeper zookeeper-0 -- bash -c "echo ruok | nc localhost 2181"
+# Expected output: imok
+```
+
+Scale to multiple pods:
+
+```bash
+# Add the second pod
+kubectl scale statefulset zookeeper -n zookeeper --replicas=2
+
+# Add the third after the second pod is ready
+kubectl scale statefulset zookeeper -n zookeeper --replicas=3
+```
+
+Verify cluster status:
+
+```bash
+kubectl exec -n zookeeper zookeeper-0 -- bash -c "echo stat | nc localhost 2181"
+
+# Expected zkServer.sh status output:
+# zookeeper-0: Mode: follower (or leader)
+# zookeeper-1: Mode: leader (or follower) 
+# zookeeper-2: Mode: follower
+```
+
+We are all set for ZooKeeper.
+
+## 2. Set Up ClickHouse with Sharding and Replication
+
+As I mentioned earlier, we are not going to write a database engine from scratch for scaling. ClickHouse already has this capability. We just need to configure it to make it ready.
+
+Create a ConfigMap for ClickHouse Replication and Sharding:
+
+```yaml
+# clickhouse-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-cluster-config
+data:
+  config.xml: |
+    <clickhouse replace="true">
+      <logger>
+        <level>information</level>
+        <log>/var/log/clickhouse-server/clickhouse-server.log</log>
+        <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
+        <size>1000M</size>
+        <count>3</count>
+      </logger>
+        
+      <listen_host>0.0.0.0</listen_host>
+      <http_port>8123</http_port>
+      <tcp_port>9000</tcp_port>
+        
+      <user_directories>
+        <users_xml>
+          <path>users.xml</path>
+        </users_xml>
+        <local_directory>
+          <path>/var/lib/clickhouse/access/</path>
+        </local_directory>
+      </user_directories>
+        
+      <distributed_ddl>
+        <path>/clickhouse/task_queue/ddl</path>
+      </distributed_ddl>
+        
+      <remote_servers>
+        <cluster_2R_2S>
+          <shard>
+            <internal_replication>true</internal_replication>
+            <replica>
+              <host>clickhouse-cluster-0.clickhouse-headless.default.svc.cluster.local</host>
+              <port>9000</port>
+            </replica>
+            <replica>
+              <host>clickhouse-cluster-1.clickhouse-headless.default.svc.cluster.local</host>
+              <port>9000</port>
+            </replica>
+          </shard>
+          <shard>
+            <internal_replication>true</internal_replication>
+            <replica>
+              <host>clickhouse-cluster-2.clickhouse-headless.default.svc.cluster.local</host>
+              <port>9000</port>
+            </replica>
+            <replica>
+              <host>clickhouse-cluster-3.clickhouse-headless.default.svc.cluster.local</host>
+              <port>9000</port>
+            </replica>
+          </shard>
+        </cluster_2R_2S>
+      </remote_servers>
+        
+      <zookeeper>
+        <node>
+          <host>zookeeper-0.zookeeper-headless.zookeeper.svc.cluster.local</host>
+          <port>2181</port>
+        </node>
+        <node>
+          <host>zookeeper-1.zookeeper-headless.zookeeper.svc.cluster.local</host>
+          <port>2181</port>
+        </node>
+        <node>
+          <host>zookeeper-2.zookeeper-headless.zookeeper.svc.cluster.local</host>
+          <port>2181</port>
+        </node>
+      </zookeeper>
+        
+      <macros>
+        <shard from_env="SHARD_ID"></shard>
+        <replica from_env="REPLICA_ID"></replica>
+      </macros>
+    </clickhouse>
+  
+  users.xml: |
+    <?xml version="1.0"?>
+    <clickhouse replace="true">
+      <profiles>
+        <default>
+          <max_memory_usage>10000000000</max_memory_usage>
+          <use_uncompressed_cache>0</use_uncompressed_cache>
+          <load_balancing>in_order</load_balancing>
+          <log_queries>1</log_queries>
+        </default>
+      </profiles>
+      <users>
+        <default>
+          <access_management>1</access_management>
+          <profile>default</profile>
+          <networks>
+            <ip>::/0</ip>
+          </networks>
+          <quota>default</quota>
+          <named_collection_control>1</named_collection_control>
+          <show_named_collections>1</show_named_collections>
+          <show_named_collections_secrets>1</show_named_collections_secrets>
+        </default>
+      </users>
+      <quotas>
+        <default>
+          <interval>
+            <duration>3600</duration>
+            <queries>0</queries>
+            <errors>0</errors>
+            <result_rows>0</result_rows>
+            <read_rows>0</read_rows>
+            <execution_time>0</execution_time>
+          </interval>
+        </default>
+      </quotas>
+    </clickhouse>
+```
+
+Create a Headless Service for ClickHouse:
+
+```yaml
+# clickhouse-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse-headless
+spec:
+  clusterIP: None
+  selector:
+    app: clickhouse-cluster
+  ports:
+  - port: 9000
+    name: native
+  - port: 8123
+    name: http
+```
+
+Create StatefulSet for ClickHouse:
+
+```yaml
+# clickhouse-deployment.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse-cluster
+spec:
+  serviceName: clickhouse-headless
+  replicas: 1  
+  podManagementPolicy: OrderedReady
+  selector:
+    matchLabels:
+      app: clickhouse-cluster
+  template:
+    metadata:
+      labels:
+        app: clickhouse-cluster
+    spec:
+      initContainers:
+      - name: setup-config
+        image: busybox:1.35
+        command:
+        - sh
+        - -c
+        - |
+          set -ex
+          
+          # Get pod number
+          POD_NUM=$(echo $HOSTNAME | grep -o '[0-9]*$')
+          SHARD_ID=$(( POD_NUM / 2 + 1 ))
+          REPLICA_ID=$(( POD_NUM % 2 + 1 ))
+          
+          echo "Pod: $HOSTNAME, Shard: $SHARD_ID, Replica: $REPLICA_ID"
+          
+          # Write into env file
+          echo "SHARD_ID=$SHARD_ID" > /shared/env
+          echo "REPLICA_ID=$REPLICA_ID" >> /shared/env
+          
+          cat /shared/env
+        volumeMounts:
+        - name: shared-data
+          mountPath: /shared
+      
+      containers:
+      - name: clickhouse
+        image: clickhouse/clickhouse-server:23.12
+        ports:
+        - containerPort: 9000
+          name: native
+        - containerPort: 8123
+          name: http
+        
+        command:
+        - bash
+        - -c
+        - |
+          set -ex
+          
+          # Read environment variables
+          source /shared/env
+          export SHARD_ID
+          export REPLICA_ID
+          
+          echo "Starting ClickHouse with Shard: $SHARD_ID, Replica: $REPLICA_ID"
+          
+          # Start ClickHouse server
+          exec /entrypoint.sh
+        
+        env:
+        - name: CLICKHOUSE_DB
+          value: "default"
+        - name: CLICKHOUSE_USER
+          value: "default"
+        - name: CLICKHOUSE_PASSWORD
+          value: ""
+        
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/clickhouse
+        - name: config
+          mountPath: /etc/clickhouse-server/config.xml
+          subPath: config.xml
+          readOnly: true
+        - name: config
+          mountPath: /etc/clickhouse-server/users.xml
+          subPath: users.xml
+          readOnly: true
+        - name: shared-data
+          mountPath: /shared
+        
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+        
+        livenessProbe:
+          httpGet:
+            path: /ping
+            port: 8123
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /ping
+            port: 8123
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+     
+      volumes:
+      - name: config
+        configMap:
+          name: clickhouse-cluster-config
+      - name: shared-data
+        emptyDir: {}
+  
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "nfs-client"
+      resources:
+        requests:
+          storage: 100Gi
+```
+
+Create a Service for ClickHouse:
+
+```yaml
+# clickhouse-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: clickhouse-cluster
+  ports:
+  - port: 8123
+    targetPort: 8123
+    name: http
+  - port: 9000
+    targetPort: 9000
+    name: native
+```
+
+Apply the ClickHouse configuration:
+
+```bash
+kubectl apply -f clickhouse-configmap.yaml
+kubectl apply -f clickhouse-headless.yaml
+kubectl apply -f clickhouse-deployment.yaml
+kubectl apply -f clickhouse-service.yaml
+```
+
+Wait for the first pod to be ready, then scale to 4 pods:
+
+```bash
+# Scale gradually to ensure proper initialization
+kubectl scale statefulset clickhouse-cluster --replicas=2
+kubectl wait --for=condition=ready pod clickhouse-cluster-1 --timeout=300s
+
+kubectl scale statefulset clickhouse-cluster --replicas=3
+kubectl wait --for=condition=ready pod clickhouse-cluster-2 --timeout=300s
+
+kubectl scale statefulset clickhouse-cluster --replicas=4
+kubectl wait --for=condition=ready pod clickhouse-cluster-3 --timeout=300s
+```
+
+All pods need to be running. If you get errors, you need to check your ConfigMap or StatefulSet files.
+
+We are done with the ClickHouse setup. Now we should have a ClickHouse cluster with 2 replicas and 2 shards.
+
+## How to Verify the Cluster?
+
+Connect to the ClickHouse pod:
+
+```bash
+kubectl exec -it clickhouse-cluster-0 -- clickhouse-client
+```
+
+Check the cluster topology:
+
+```sql
+SELECT cluster, shard_num, replica_num, host_name, port FROM system.clusters;
+```
+
+Check the ZooKeeper connection:
+
+```sql
+SELECT * FROM system.zookeeper WHERE path IN ('/', '/clickhouse');
+```
+
+Test distributed table creation:
+
+```sql
+-- Create local table on each node
+CREATE TABLE test_local ON CLUSTER cluster_2R_2S (
+    id UInt32,
+    data String,
+    timestamp DateTime
+) ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/test_local', '{replica}')
+ORDER BY (id, timestamp);
+
+-- Create distributed table
+CREATE TABLE test_distributed ON CLUSTER cluster_2R_2S (
+    id UInt32,
+    data String,
+    timestamp DateTime
+) ENGINE = Distributed('cluster_2R_2S', default, test_local, rand());
+
+-- Test data insertion
+INSERT INTO test_distributed VALUES (1, 'test data', now());
+
+-- Verify data distribution
+SELECT * FROM test_distributed;
+```
+
+## Troubleshooting Common Issues
+
+### ZooKeeper Connection Issues
+
+```bash
+# Check ZooKeeper logs
+kubectl logs -n zookeeper zookeeper-0
+
+# Test ZooKeeper connectivity
+kubectl exec -n zookeeper zookeeper-0 -- zkCli.sh -server localhost:2181 ls /
+```
+
+### ClickHouse Cluster Issues
+
+```bash
+# Check ClickHouse logs
+kubectl logs clickhouse-cluster-0
+
+# Verify cluster configuration
+kubectl exec -it clickhouse-cluster-0 -- clickhouse-client --query "SELECT * FROM system.clusters"
+```
+
+## Conclusion
+
+Congratulations! You have successfully set up a distributed ClickHouse cluster with 2 replicas and 2 shards on Kubernetes. This setup provides both high availability through replication and horizontal scalability through sharding.
+
+## Resources
+- [ClickHouse Cluster Deployment Architecture](https://clickhouse.com/docs/architecture/cluster-deployment)
+- [Stack Overflow: ClickHouse Sharding and Replication](https://stackoverflow.com/a/52713482)
+- [Apache ZooKeeper Documentation](https://cwiki.apache.org/confluence/display/ZOOKEEPER/Index)
+- [MongoDB Replication and Sharding (GeeksforGeeks)](https://www.geeksforgeeks.org/mongodb/mongodb-replication-and-sharding/)
