@@ -1,0 +1,64 @@
+---
+title: "Dev Logs - 1: Race Condition, DeepCopy and Select"
+publishedAt: "2025-09-18"
+summary: "Solving the Race Condition problem by using a Deep Copy"
+---
+This is a spontaneous blog post that came to me while I was working on the task assigned to me yesterday. Actually, I used to share this kind of dev logs on my Twitter account when I had one. These posts are some kind of self-notes for me.
+
+I am not going to explain the task that I was working on, but it required concurrent execution of the queries, which are the foundation of our product.
+
+## The Problem
+
+Here is the code block that needed to be debugged:
+
+```csharp
+List<Task<PreparedQueryExecutionDTO?>> executionTasks = preparedQueries
+    .Select(query => CreateExecutionTaskForIntegratedQuery(query, integratedQueryDTO, userDetails, attributeType))
+    .ToList();
+
+PreparedQueryExecutionDTO?[] executionResults = await Task.WhenAll(executionTasks);
+```
+
+The function `CreateExecutionTaskForIntegratedQuery` here is an async function that returns `Task<>`. This seems okay when we have only one element in the list `preparedQueries`. But when we have more than one element in the list, things do not go as expected because the async method is inside the select.
+
+The select method projects each element of a sequence into a new form. You can think of this as the `map()` function in JavaScript. Because of the async function in this select, it generates `Task<>` immediately and continues to the next element without waiting for the previous one to complete. If you are careful enough, you can notice that all the elements in the list use the same `integratedQueryDTO`. So if you are manipulating the DTO in the `CreateExecutionTaskForIntegratedQuery`, this will affect the concurrent tasks. This is a race condition problem that needs to be solved.
+
+## How to solve the race condition problem?
+
+The answer is **Deep Copy**. A **deep copy** of an object is a copy whose properties do not share the same references (point to the same underlying values) as those of the source object from which the copy was made. As a result, when you change either the source or the copy, you can be assured you're not causing the other object to change too.
+
+This is how you can do a deep copy in .NET:
+
+```csharp
+IntegratedQueryDTO? dtoCopy = JsonConvert.DeserializeObject<IntegratedQueryDTO>(
+    JsonConvert.SerializeObject(integratedQueryDTO)
+);
+```
+
+And how to use it in our case:
+
+```csharp
+List<Task<PreparedQueryExecutionDTO?>> executionTasks = preparedQueries
+    .Select(async query =>
+    {
+        try
+        {
+            IntegratedQueryDTO? dtoCopy = JsonConvert.DeserializeObject<IntegratedQueryDTO>(
+                JsonConvert.SerializeObject(integratedQueryDTO)
+            );
+            return await CreateExecutionTaskForIntegratedQuery(query, dtoCopy, userDetails);
+        }
+        catch (Exception ex)
+        {
+            // print your exception
+        }
+    })
+    .ToList();
+```
+
+With this update, our code will not be affected by the race condition problem, thanks to the deep copy method.
+
+## Sources
+
+- [Microsoft Docs - Enumerable.Select Method](https://learn.microsoft.com/en-us/dotnet/api/system.linq.enumerable.select?view=net-9.0)
+- [MDN Web Docs - Deep Copy](https://developer.mozilla.org/en-US/docs/Glossary/Deep_copy)
