@@ -1,0 +1,38 @@
+---
+title: "Dev Logs - 2: ERR_CERT_AUTHORITY_INVALID"
+publishedAt: "2025-10-05"
+summary: "Solving the ERR_CERT_AUTHORITY_INVALID error"
+---
+Hi everyone,
+
+This is a brief blog post about the error I encountered last week while working on our project.
+
+## The Setup
+
+One of our products' features is enabling geographical analysis on the map layers, but for several reasons, we cannot use open-source map layers, including one that is provided by Google. We deployed our own by using Maptiler and similar technologies. (I won't go into the deployment process here.)
+
+## The Problem
+
+In our case, our client side had been sending requests to our map server domain, which had been working smoothly since last week. However, the certificate of the map server was updated. So whenever our clients tried to open the geographical analysis page, they could not see the map layers, and they received `ERR_CERT_AUTHORITY_INVALID` at the browser console.
+
+This is basically because the client code has not been updated to trust the new certificate of the map server. You could solve the problem by trusting the new certificate on your browser, but every individual user had to do the same thing. So it is not a scalable solution.
+
+## How to Solve the Problem?
+
+By not sending requests from the client. This is crucial because, when you send requests directly from the client side, each client has to check the certificate individually. If you have like 200 users, each one of them would have to go through the process of accepting a new certificate.
+
+### What Should We Do?
+
+**Old flow:**
+Client → www.mapserver.com
+
+**New flow:**
+Client → our-server.com/map → www.mapserver.com
+
+Proxy your client-side requests through your server-side. Instead of sending requests from your client to `www.mapserver.com`, send your requests to the `/map` endpoint of your server-side and let the server-side handle the request for the map. By switching to this architecture, you eliminate the need for the client side and 200 users to validate the certificate, and let the server handle it instead. So whenever the certificate is updated, restarting the server is enough to validate the new certificate and solve the problem in our case.
+
+## The Takeaway
+
+Never send requests from the client-side :)
+
+Thanks for reading.
