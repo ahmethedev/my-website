@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { getBlogPosts } from "@/app/db/blog";
 import Claps from "@/components/claps";
 import { CustomMDX } from "@/components/mdx";
+import Container from "@/components/shared/container";
 import TableOfContents from "@/components/table-of-contents";
 import { extractHeadings, formatDate } from "@/lib/utils";
 
@@ -67,7 +69,7 @@ export default async function BlogDetailPage({ params }: Props) {
   }
 
   return (
-    <section className="mx-auto px-2 sm:px-6 lg:px-8 w-full sm:max-w-screen-lg">
+    <Container className="container animate-enter pt-10">
       <script
         type="application/ld+json"
         suppressHydrationWarning
@@ -85,31 +87,35 @@ export default async function BlogDetailPage({ params }: Props) {
             url: `https://abd.im/blog/${blog.slug}`,
             author: {
               "@type": "Person",
-              name: "Onurhan Demir",
+              name: "Ahmet Dinc",
             },
           }),
         }}
       />
-      <h1 className="title font-medium text-2xl tracking-tighter max-w-[650px]">
+      <h1 className="title mb-3 mt-0 text-[1.9rem] font-semibold leading-[1.15] tracking-[-0.03em] sm:text-[2.3rem]">
         {blog.metadata.title}
       </h1>
-      <div className="flex justify-start items-center mt-2 mb-8 text-sm max-w-[650px]">
-        <Suspense fallback={<p className="h-5" />}>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            {formatDate(blog.metadata.publishedAt)}
-          </p>
-          <span className="mx-2 text-neutral-400">—</span>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            {blog.readingTime} min read
-          </p>
-        </Suspense>
-      </div>
+      <Suspense fallback={<p className="h-6" />}>
+        <p className="label m-0 text-[hsl(var(--ink-muted))]">
+          {formatDate(blog.metadata.publishedAt)}
+          {" · "}
+          {blog.readingTime} min read
+        </p>
+      </Suspense>
+
       <TableOfContents headings={headings} />
-      <article className="prose prose-quoteless prose-neutral dark:prose-invert text-justify w-auto">
+
+      <article className="prose prose-quoteless w-auto max-w-none font-sans">
         <CustomMDX source={blog.content} />
       </article>
 
+      <p className="mt-14 border-t border-[hsl(var(--rule))] pt-8">
+        <Link href="/blog" className="label">
+          ← All posts
+        </Link>
+      </p>
+
       <Claps key={blog.slug} />
-    </section>
+    </Container>
   );
 }

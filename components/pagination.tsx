@@ -5,7 +5,6 @@ import type { Blog } from "@/types/blog";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { BlogList } from "./blog-list";
-import { Button } from "./ui/button";
 
 interface PaginationProps {
   allBlogs: Blog[];
@@ -14,7 +13,7 @@ interface PaginationProps {
 
 export default function Pagination({
   allBlogs,
-  postsPerPage = 5,
+  postsPerPage = 8,
 }: PaginationProps) {
   const router = useRouter();
   const searchParamsHook = useSearchParams();
@@ -37,25 +36,28 @@ export default function Pagination({
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
-    const path = page === 1 ? "/blog" : `/blog?page=${page}`;
-    router.push(path);
+    router.push(page === 1 ? "/blog" : `/blog?page=${page}`);
   };
+
+  if (totalPages <= 1) {
+    return <BlogList blogs={paginatedBlogs} currentPage={currentPage} />;
+  }
 
   return (
     <>
       <BlogList blogs={paginatedBlogs} currentPage={currentPage} />
       <nav
         aria-label="Blog pagination"
-        className="flex justify-center gap-4 mt-8"
+        className="mt-12 flex items-center justify-center gap-6 border-t border-[hsl(var(--rule))] pt-8"
       >
         <PaginationButton
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
-          Previous
+          ← Newer
         </PaginationButton>
 
-        <span className="flex items-center tracking-tight text-sm text-muted-foreground">
+        <span className="label text-[hsl(var(--ink-muted))]">
           Page {currentPage} of {totalPages}
         </span>
 
@@ -63,7 +65,7 @@ export default function Pagination({
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
-          Next
+          Older →
         </PaginationButton>
       </nav>
     </>
@@ -80,13 +82,18 @@ function PaginationButton({
   onClick: () => void;
 }) {
   return (
-    <Button
+    <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
-      variant="outline"
-      className={cn("tracking-tight shadow-none", disabled && "opacity-50")}
+      className={cn(
+        "label transition-colors",
+        disabled
+          ? "cursor-default text-[hsl(var(--rule))]"
+          : "text-[hsl(var(--link))] hover:underline"
+      )}
     >
       {children}
-    </Button>
+    </button>
   );
 }

@@ -4,89 +4,71 @@
 
 @import "@upstash/claps/style.css";
 
-::selection {
-  color: #047857;
-  background-color: #34d399;
-}
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Cool paper, amber accent */
+    --paper: 220 18% 96%;
+    --ink: 218 21% 10%;
+    --ink-muted: 217 13% 40%;
+    --rule: 215 20% 86%;
+    --rule-soft: 218 22% 92%;
+    --link: 33 87% 31%;
+    --link-hover: 30 92% 25%;
+    --wash: 214 21% 93%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-
-    --accent: 214 3.31% 91.4%;
-    --accent-foreground: 240 5.9% 10%;
-
+    --background: var(--paper);
+    --foreground: var(--ink);
+    --card: var(--paper);
+    --card-foreground: var(--ink);
+    --popover: var(--paper);
+    --popover-foreground: var(--ink);
+    --primary: var(--ink);
+    --primary-foreground: var(--paper);
+    --secondary: var(--wash);
+    --secondary-foreground: var(--ink);
+    --muted: var(--wash);
+    --muted-foreground: var(--ink-muted);
+    --accent: var(--wash);
+    --accent-foreground: var(--ink);
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+    --border: var(--rule);
+    --input: var(--rule);
+    --ring: var(--link);
+    --radius: 0.25rem;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 150 65% 67%;
-
-    --radius: 0.5rem;
-
-    /* Sugar high  */
+    /* Sugar high */
     --sh-class: #2d5e9d;
-    --sh-identifier: #354150;
-    --sh-sign: #8996a3;
-    --sh-string: #007f7a;
-    --sh-keyword: #e02518;
-    --sh-comment: #a19595;
-    --sh-jsxliterals: #6266d1;
-    --sh-property: #e25a1c;
-    --sh-entity: #e25a1c;
+    --sh-identifier: #26303d;
+    --sh-sign: #7b8798;
+    --sh-string: #0a6e63;
+    --sh-keyword: #a3341f;
+    --sh-comment: #7b8798;
+    --sh-jsxliterals: #5257c4;
+    --sh-property: #96570a;
+    --sh-entity: #96570a;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --paper: 214 21% 8%;
+    --ink: 214 15% 87%;
+    --ink-muted: 215 13% 60%;
+    --rule: 215 15% 19%;
+    --rule-soft: 214 17% 13%;
+    --link: 36 86% 59%;
+    --link-hover: 36 92% 68%;
+    --wash: 214 20% 11%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-
     /* Sugar high */
-    --sh-class: #4c97f8;
-    --sh-identifier: white;
-    --sh-keyword: #f47067;
-    --sh-string: #0fa295;
+    --sh-class: #6ab0ff;
+    --sh-identifier: #d7dce3;
+    --sh-sign: #7d8a9c;
+    --sh-keyword: #ff8b6b;
+    --sh-string: #4fd1c0;
+    --sh-comment: #6b7686;
   }
 }
 
@@ -95,9 +77,139 @@
     @apply border-border;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
+
+  a {
+    color: hsl(var(--link));
+    text-decoration: none;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+  }
+
+  a:hover {
+    color: hsl(var(--link-hover));
+    text-decoration: underline;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid hsl(var(--link));
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: hsl(var(--wash));
+    color: hsl(var(--ink));
+  }
+}
+
+/* Monospace label: nav items, metadata lines, small links */
+.label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+/* Section eyebrow: the mono, tracked-out heading above each block */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: hsl(var(--ink-muted));
+}
+
+.eyebrow::before {
+  content: "";
+  width: 0.4rem;
+  height: 0.4rem;
+  flex: none;
+  background: hsl(var(--link));
+}
+
+/* The wordmark */
+.wordmark {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Year / label + description grid, as on the work history and post lists */
+.stack-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.6rem 1.5rem;
+}
+
+.stack-grid > time,
+.stack-grid > .stack-label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8rem;
+  line-height: 1.9;
+  color: hsl(var(--ink-muted));
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 520px) {
+  .stack-grid {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .stack-grid > time,
+  .stack-grid > .stack-label {
+    margin-top: 0.9rem;
+  }
+
+  .stack-grid > :first-child {
+    margin-top: 0;
+  }
+}
+
+.section-rule {
+  margin-top: 3.5rem;
+  padding-top: 2.25rem;
+  border-top: 1px solid hsl(var(--rule));
+}
+
+/* ---- MDX article styles ---- */
+
+.prose {
+  hyphens: none;
 }
 
 .prose .anchor {
@@ -114,31 +226,44 @@
   @apply visible;
 }
 
-.prose a {
-  @apply transition-all decoration-neutral-400 dark:decoration-neutral-600 underline-offset-2 decoration-[0.1em];
-}
-
 .prose .anchor:after {
-  @apply text-neutral-300 dark:text-neutral-700;
+  color: hsl(var(--rule));
   content: "#";
 }
 
-.prose *:hover>.anchor {
+.prose *:hover > .anchor {
   @apply visible;
 }
 
+.prose a {
+  text-decoration: underline;
+  text-decoration-color: hsl(var(--link) / 0.35);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.prose a:hover {
+  text-decoration-color: currentColor;
+}
+
 .prose pre {
-  @apply relative overflow-x-auto rounded-lg bg-zinc-50 dark:bg-neutral-950;
+  @apply relative overflow-x-auto rounded;
+  /* The wrapper div paints the block; the inner <pre> stays transparent */
+  background-color: transparent;
   margin: 0;
 }
 
-/* Target only the outermost pre tag */
-.prose>pre {
-  @apply bg-zinc-200/40 dark:bg-neutral-900;
+.prose code {
+  font-size: 0.9em;
 }
 
 .prose code span {
   @apply font-medium;
+}
+
+.prose blockquote {
+  border-left: 2px solid hsl(var(--rule));
+  font-style: italic;
 }
 
 .prose img {
@@ -147,16 +272,16 @@
 }
 
 .prose h2,
-h3,
-h4 {
-  @apply font-medium tracking-tighter !important;
+.prose h3,
+.prose h4 {
+  @apply font-normal !important;
 }
 
 .prose strong {
-  @apply font-medium;
+  @apply font-semibold;
 }
 
-.prose> :first-child {
+.prose > :first-child {
   /* Override removing top margin, causing layout shift */
   margin-top: 1.25em !important;
   margin-bottom: 1.25em !important;
@@ -168,9 +293,7 @@ pre::-webkit-scrollbar {
 
 pre {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
 }
 
 /* Remove Safari input shadow on mobile */
@@ -196,7 +319,7 @@ table {
   overflow-x: auto;
 }
 
-.prose .callout>p {
+.prose .callout > p {
   margin: 0 !important;
 }
 
@@ -204,33 +327,53 @@ table {
   text-wrap: balance;
 }
 
-::-webkit-scrollbar {
-  width: 0.5rem;
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: var(--foreground);
-  border-radius: 0.25rem;
-}
-
-::-webkit-scrollbar-track {
-  background-color: var(--background);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--foreground);
-}
-
-::-webkit-scrollbar-thumb:active {
-  background-color: var(--foreground);
-}
-
-::-webkit-scrollbar-corner {
-  background-color: var(--background);
-}
-
-.container>* {
+.container > * {
   animation: enter 0.3s ease both;
   animation-delay: calc(var(--delay) * var(--stagger));
   --delay: 120ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .container > * {
+    animation: none;
+  }
+}
+
+/* Project name + description, sharing one column track across all rows */
+.project-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.5rem 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-list li {
+  display: contents;
+}
+
+.project-list .project-name {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.85rem;
+  line-height: 1.9;
+}
+
+.project-list .project-desc {
+  color: hsl(var(--ink-muted));
+}
+
+@media (max-width: 520px) {
+  .project-list {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+
+  .project-list .project-name {
+    margin-top: 0.9rem;
+  }
+
+  .project-list li:first-child .project-name {
+    margin-top: 0;
+  }
 }

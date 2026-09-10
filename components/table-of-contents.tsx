@@ -1,8 +1,8 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 interface TableOfContentsProps {
   headings: { title: string; id: string }[];
@@ -10,76 +10,56 @@ interface TableOfContentsProps {
 
 const TableOfContents = ({ headings }: TableOfContentsProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+
+  if (headings.length === 0) {
+    return null;
+  }
 
   const handleClick = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
-    const element = document.getElementById(id);
-    element?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <motion.div 
-      ref={containerRef}
-      className="w-full max-w-3xl mx-auto mt-8 mb-12"
-      layout
-      layoutRoot
-    >
-      <motion.div layout className="flex items-center gap-4 mb-4">
-        <div className="flex-1 h-px bg-border" />
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <span className="text-sm font-medium">On this page</span>
-          <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ type: "spring", stiffness: 200, damping: 30 }}
-          >
-            <ChevronDown className="w-4 h-4" />
-          </motion.div>
-        </button>
-        <div className="flex-1 h-px bg-border" />
-      </motion.div>
-
-      <motion.div
-        layout
-        className="relative overflow-hidden"
-        animate={{ 
-          height: isOpen ? "auto" : 0,
-          opacity: isOpen ? 1 : 0,
-          marginBottom: isOpen ? "1rem" : 0
-        }}
-        transition={{
-          height: { duration: 0.3, ease: "easeInOut" },
-          opacity: { duration: 0.2 },
-          marginBottom: { duration: 0.3 }
-        }}
+    <div className="mt-10">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-expanded={isOpen}
+        className="label flex items-center gap-2 uppercase tracking-[0.16em] text-[hsl(var(--ink-muted))] transition-colors hover:text-foreground"
       >
-        <nav className="flex flex-col space-y-2 px-4">
-          {headings.map((heading, i) => (
-            <motion.a
+        On this page
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="flex"
+        >
+          <ChevronDown className="h-3.5 w-3.5" strokeWidth={2} />
+        </motion.span>
+      </button>
+
+      {/* initial={false} so the list renders collapsed instead of animating down from full height */}
+      <motion.div
+        initial={false}
+        animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }}
+        transition={{ duration: 0.25, ease: "easeInOut" }}
+        className="overflow-hidden"
+      >
+        <nav className="mt-4 flex flex-col gap-2 border-l border-[hsl(var(--rule))] pl-4">
+          {headings.map((heading) => (
+            <a
               key={heading.id}
-              initial={false}
-              animate={{ 
-                opacity: isOpen ? 1 : 0,
-                x: isOpen ? 0 : -4 
-              }}
-              transition={{
-                duration: 0.2,
-                delay: isOpen ? i * 0.05 : 0
-              }}
               href={`#${heading.id}`}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors py-1 hover:underline underline-offset-4"
               onClick={(e) => handleClick(e, heading.id)}
+              className="text-[0.95rem] text-[hsl(var(--ink-muted))] no-underline transition-colors hover:text-foreground"
             >
               {heading.title}
-            </motion.a>
+            </a>
           ))}
         </nav>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
-export default TableOfContents; 
+export default TableOfContents;

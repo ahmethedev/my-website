@@ -1,27 +1,32 @@
+import type { Blog } from "@/types/blog";
 import Link from "next/link";
 
-export const BlogCard = ({ blog }) => {
+export const BlogCard = ({ blog }: { blog: Blog }) => {
+  const published = new Date(`${blog.metadata.publishedAt}T00:00:00`);
+
   return (
-    <article className="py-4 sm:py-8 dark:border-b-zinc-800">
-      <header>
-        <h3 className="font-semibold underline underline-offset-4 decoration-1 decoration-zinc-300">
-          <Link href={`/blog/${blog.slug}`}>{blog.metadata.title}</Link>
-        </h3>
-        <p className="mt-1 opacity-70 dark:opacity-60">
-          {blog.metadata.summary}
-        </p>
-      </header>
-      <footer className="mt-1 flex items-center space-x-2 font-mono text-sm uppercase tracking-wider opacity-50 dark:opacity-40">
-        <time>
-          {new Date(blog.metadata.publishedAt).toLocaleDateString("en-US", {
+    <article className="py-7">
+      <h2 className="mb-2 mt-0 text-[1.25rem] tracking-[-0.02em]">
+        <Link href={`/blog/${blog.slug}`} className="text-foreground">
+          {blog.metadata.title}
+        </Link>
+      </h2>
+      <p className="label m-0 text-[hsl(var(--ink-muted))]">
+        <time dateTime={blog.metadata.publishedAt}>
+          {published.toLocaleDateString("en-US", {
             year: "numeric",
             month: "long",
             day: "numeric",
           })}
         </time>
-        <span>·</span>
-        <span>{blog.readingTime} MIN READ</span>
-      </footer>
+        {" · "}
+        {blog.readingTime} min read
+      </p>
+      {blog.metadata.summary && (
+        <p className="mb-0 mt-3 max-w-[62ch] text-[hsl(var(--ink-muted))]">
+          {blog.metadata.summary}
+        </p>
+      )}
     </article>
   );
 };

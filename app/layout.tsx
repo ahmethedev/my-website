@@ -1,26 +1,41 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
+import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { ThemeProvider } from "./theme-provider";
 
-const inter = Inter({ subsets: ["latin"] });
+const plexSans = IBM_Plex_Sans({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-sans",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+  variable: "--font-mono",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://abd.im"),
   title: {
-    default: "Ahmet Burak Dinc",
-    template: "%s | Ahmet Burak Dinc",
+    default: "Ahmet Dinc",
+    template: "%s | Ahmet Dinc",
   },
-  description: "Software Engineer",
+  description:
+    "Software engineer working on quantitative research, market microstructure and trading systems.",
   openGraph: {
-    title: "Ahmet Burak Dinc",
-    description: "Software Engineer",
+    title: "Ahmet Dinc",
+    description:
+      "Software engineer working on quantitative research, market microstructure and trading systems.",
     url: "https://abd.im",
-    siteName: "Ahmet Burak Dinc",
+    siteName: "Ahmet Dinc",
     locale: "en_US",
     type: "website",
   },
@@ -36,12 +51,11 @@ export const metadata: Metadata = {
     },
   },
   twitter: {
-    title: "Ahmet Burak Dinc",
+    title: "Ahmet Dinc",
     card: "summary_large_image",
   },
   verification: {
     google: "K1pkJ72cY3DylswXke2MHJGxmjJ91WXwgozcCICvFrU",
-    // TODO: Add yandex verification key here
   },
 };
 
@@ -53,21 +67,19 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.className} bg-zinc-50 dark:bg-zinc-950 overflow-y-scroll`}
+        className={`${plexSans.variable} ${plexMono.variable} font-sans text-[1.0125rem] leading-[1.65] bg-background text-foreground`}
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="theme"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <main className=" antialiased lg:max-w-2xl md:max-w-full mx-4 mb-40 flex flex-col md:flex-row  mt-2 sm:mt-8 lg:mx-auto">
-            <section className="flex-auto min-w-0 mt-6 flex flex-col px-2 md:px-0">
-              <Header />
-
-              {children}
-            </section>
-          </main>
+          <div className="flex min-h-screen flex-col">
+            <Header />
+            <main className="flex-auto">{children}</main>
+            <Footer />
+          </div>
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

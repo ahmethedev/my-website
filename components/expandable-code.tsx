@@ -31,7 +31,7 @@ export function ExpandableCode({
   }, []);
 
   return (
-    <div className={cn("bg-zinc-50 dark:bg-neutral-950 rounded-lg", className)}>
+    <div className={cn("rounded bg-[hsl(var(--wash))]", className)}>
       <div
         ref={contentRef}
         className={cn(
@@ -44,7 +44,7 @@ export function ExpandableCode({
       >
         {children}
         {!isExpanded && shouldShowButton && (
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-zinc-50 dark:from-neutral-950 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[hsl(var(--wash))] to-transparent" />
         )}
       </div>
 
@@ -55,8 +55,8 @@ export function ExpandableCode({
             size="sm"
             onClick={toggleExpand}
             className={cn(
-              "text-xs gap-1 h-7 text-neutral-400",
-              "hover:text-neutral-500 hover:bg-transparent dark:hover:text-neutral-500 dark:hover:bg-neutral-950",
+              "label h-7 gap-1 text-[hsl(var(--ink-muted))]",
+              "hover:bg-transparent hover:text-foreground",
               "transition-all duration-200"
             )}
           >

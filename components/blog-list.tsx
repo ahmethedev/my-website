@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { BlogCard } from "./blog-card";
-import Separator from "./shared/separator";
 
 interface BlogListProps {
   blogs: any[];
@@ -41,11 +40,11 @@ export function BlogList({ blogs, currentPage }: BlogListProps) {
         variants={container}
         initial="hidden"
         animate="show"
+        className="divide-y divide-[hsl(var(--rule-soft))]"
       >
-        {blogs.map((blog, index, array) => (
+        {blogs.map((blog) => (
           <motion.div key={blog.slug} variants={item}>
             <BlogCard blog={blog} />
-            {index !== array.length - 1 && <Separator />}
           </motion.div>
         ))}
       </motion.div>

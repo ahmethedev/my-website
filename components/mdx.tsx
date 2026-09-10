@@ -11,10 +11,10 @@ function Table({ data }) {
   let headers = data.headers.map((header, index) => (
     <th
       key={index}
-      className="border-b border-neutral-200 dark:border-neutral-800
-        bg-secondary dark:bg-secondary/50
+      className="border-b border-[hsl(var(--rule))]
+        bg-[hsl(var(--wash))]
         px-4 py-2 text-left
-        text-sm font-semibold text-secondary-foreground dark:text-secondary-foreground
+        text-sm font-semibold
         first:pl-6 last:pr-6 whitespace-nowrap"
     >
       {header}
@@ -29,7 +29,7 @@ function Table({ data }) {
       {row.map((cell, cellIndex) => (
         <td
           key={cellIndex}
-          className="border-b border-neutral-200 dark:border-neutral-800
+          className="border-b border-[hsl(var(--rule-soft))]
             px-4 py-2 text-xs text-muted-foreground
             first:pl-6 last:pr-6"
         >
@@ -86,12 +86,12 @@ function Callout(props) {
 
 function ProsCard({ title, pros }) {
   return (
-    <div className="border border-emerald-200 dark:border-emerald-900 bg-neutral-50 dark:bg-neutral-900 rounded-xl p-6 my-4 w-full">
+    <div className="my-4 w-full rounded border border-[hsl(var(--link))]/40 bg-[hsl(var(--wash))] p-6">
       <div className="mt-4">
         {pros.map((pro) => (
           <div key={pro} className="flex font-medium items-baseline mb-2">
             <div className="h-4 w-4 mr-2">
-              <svg className="h-4 w-4 text-emerald-500" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 text-[hsl(var(--link))]" viewBox="0 0 24 24">
                 <g
                   fill="none"
                   stroke="currentColor"
@@ -114,7 +114,7 @@ function ProsCard({ title, pros }) {
 
 function ConsCard({ title, cons }) {
   return (
-    <div className="border border-red-200 dark:border-red-900 bg-neutral-50 dark:bg-neutral-900 rounded-xl p-6 my-6 w-full">
+    <div className="my-6 w-full rounded border border-[hsl(var(--destructive))]/40 bg-[hsl(var(--wash))] p-6">
       <div className="mt-4">
         {cons.map((con) => (
           <div key={con} className="flex font-medium items-baseline mb-2">
@@ -139,7 +139,7 @@ function ConsCard({ title, cons }) {
 function LinkCardList({ cards }) {
   return (
     <div
-      className=" bg-neutral-100 dark:bg-neutral-900 rounded-xl p-6
+      className=" rounded bg-[hsl(var(--wash))] p-6
     my-4 w-full gap-12"
     >
       {cards.map((card) => (
@@ -185,7 +185,7 @@ function Code({ children, ...props }) {
   );
 
   const wrappedCode = (
-    <div className="bg-zinc-50 dark:bg-neutral-950 rounded-lg">
+    <div className="rounded bg-[hsl(var(--wash))] border border-[hsl(var(--rule-soft))]">
       <CopyCode code={children} className="p-4">
         {codeBlock}
       </CopyCode>
@@ -243,7 +243,7 @@ export function BuyMeACoffee({ username }: BuyMeACoffeeProps) {
         href={`https://buymeacoffee.com/${username}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-2 text-sm text-neutral-900 transition-colors hover:bg-neutral-100 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-50 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-2 rounded border border-[hsl(var(--rule))] bg-[hsl(var(--wash))] px-4 py-2 text-sm text-foreground no-underline transition-colors hover:border-[hsl(var(--link))]"
       >
         <Coffee className="h-4 w-4" />
         <span>support content</span>

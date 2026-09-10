@@ -1,69 +1,97 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Container from "./shared/container";
+import IconGithub from "./shared/icons/github";
+import IconLinkedin from "./shared/icons/linkedin";
 import { ModeToggle } from "./ui/theme-toggle";
 
-const NAV_ITEMS = {
-  about: "/",
-  blog: "/blog",
-  projects: "/projects",
-  cv: "/work",
-};
+const NAV_ITEMS = [
+  { name: "Blog", href: "/blog" },
+  { name: "CV", href: "/work" },
+];
+
+const SOCIAL_ITEMS = [
+  {
+    name: "GitHub",
+    href: "https://github.com/ahmethedev",
+    label: "View my GitHub profile",
+    icon: IconGithub,
+  },
+  {
+    name: "LinkedIn",
+    href: "https://www.linkedin.com/in/ahmetburakdinc/",
+    label: "Connect with me on LinkedIn",
+    icon: IconLinkedin,
+  },
+];
 
 export const Header = () => {
   const pathname = usePathname();
 
   return (
-    <header>
-      <Container size="large">
-        <nav
-          className="flex flex-col fade items-center md:items-start justify-start py-8 tracking-tight w-full sm:pr-0 md:pr-6 lg:pr-0"
-          aria-label="Main navigation"
-        >
-          <div className="flex flex-row items-center">
-            <Link href="/">
-              <Image
-                src="/images/linkedinpfp.png"
-                alt="Logo"
-                width={100}
-                height={100}
-                priority={true}
-                className="rounded-full"
-              />
-              <span className="sr-only">Ahmet Burak Dinc</span>
-            </Link>
+    <Container>
+      <header className="flex flex-col items-center gap-3 border-b border-[hsl(var(--rule))] pb-4 pt-8 sm:flex-row sm:items-baseline sm:justify-between">
+        <p className="m-0 leading-none">
+          <Link
+            href="/"
+            rel="home"
+            className="wordmark text-foreground no-underline hover:no-underline"
+          >
+            Ahmet Dinc
+            <span aria-hidden className="ml-2 text-[hsl(var(--link))]">
+              /
+            </span>
+          </Link>
+        </p>
 
-            <div className="flex flex-col ml-4">
-              <span className="text-medium inline-block font-medium">
-                Ahmet Burak Dinc
-              </span>
-              <span className="opacity-60">software engineer</span>
-            </div>
-          </div>
+        <nav aria-label="Primary">
+          <ul className="m-0 flex list-none flex-wrap items-center justify-center gap-x-5 gap-y-1 p-0">
+            {NAV_ITEMS.map(({ name, href }) => {
+              const isActive = pathname?.startsWith(href) ?? false;
 
-          <div className="flex flex-row items-center justify-between sm:justify-end w-full mt-8 sm:mt-4 mb-0 sm:mb-4 tracking-tight">
-            <div className="inline-flex items-center">
-              {Object.entries(NAV_ITEMS).map(([name, href]) => (
-                <Link
+              return (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "label no-underline transition-colors hover:text-foreground",
+                      isActive
+                        ? "text-foreground"
+                        : "text-[hsl(var(--ink-muted))]"
+                    )}
+                  >
+                    {name}
+                  </Link>
+                </li>
+              );
+            })}
+
+            <li className="ml-1 flex items-center gap-[0.9em]">
+              {SOCIAL_ITEMS.map(({ name, href, label, icon: Icon }) => (
+                <a
                   key={name}
                   href={href}
-                  className={cn(
-                    pathname === href ? "font-semibold" : "font-normal",
-                    "transition-all hover:text-neutral-800 dark:hover:text-neutral-200 flex align-middle relative py-1 px-2"
-                  )}
+                  rel="me noopener noreferrer"
+                  target="_blank"
+                  aria-label={label}
+                  title={label}
+                  className="block text-[hsl(var(--ink-muted))] transition-colors hover:text-foreground"
                 >
-                  {name}
-                </Link>
+                  <Icon size={17} />
+                </a>
               ))}
-            </div>
-            <ModeToggle />
-          </div>
+            </li>
+
+            <li className="flex items-center">
+              <ModeToggle />
+            </li>
+          </ul>
         </nav>
-      </Container>
-    </header>
+      </header>
+    </Container>
   );
 };

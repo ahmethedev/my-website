@@ -9,6 +9,20 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          "var(--font-sans)",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "sans-serif",
+        ],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
+      },
+      maxWidth: {
+        reading: "46rem",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -42,6 +56,44 @@ const config: Config = {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            "--tw-prose-body": "hsl(var(--ink))",
+            "--tw-prose-headings": "hsl(var(--ink))",
+            "--tw-prose-lead": "hsl(var(--ink-muted))",
+            "--tw-prose-links": "hsl(var(--link))",
+            "--tw-prose-bold": "hsl(var(--ink))",
+            "--tw-prose-counters": "hsl(var(--ink-muted))",
+            "--tw-prose-bullets": "hsl(var(--rule))",
+            "--tw-prose-hr": "hsl(var(--rule))",
+            "--tw-prose-quotes": "hsl(var(--ink-muted))",
+            "--tw-prose-quote-borders": "hsl(var(--rule))",
+            "--tw-prose-captions": "hsl(var(--ink-muted))",
+            "--tw-prose-code": "hsl(var(--ink))",
+            "--tw-prose-pre-code": "hsl(var(--ink))",
+            "--tw-prose-pre-bg": "hsl(var(--wash))",
+            "--tw-prose-th-borders": "hsl(var(--rule))",
+            "--tw-prose-td-borders": "hsl(var(--rule-soft))",
+            maxWidth: "none",
+            // Typography wraps inline code in literal backticks by default
+            "code::before": { content: '""' },
+            "code::after": { content: '""' },
+            code: {
+              fontWeight: "400",
+              fontSize: "0.875em",
+              backgroundColor: "hsl(var(--wash))",
+              borderRadius: "3px",
+              padding: "0.15em 0.35em",
+            },
+            "pre code": {
+              backgroundColor: "transparent",
+              fontSize: "0.85em",
+              padding: "0",
+            },
+          },
         },
       },
       borderRadius: {

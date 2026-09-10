@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "#0a0a0a",
+            backgroundColor: "#fffff8",
             position: "relative",
           }}
         >
@@ -36,26 +36,15 @@ export async function GET(req: NextRequest) {
               gap: "8px",
             }}
           >
-            <img
-              src={new URL(
-                "/logo.svg",
-                process.env.NEXT_PUBLIC_APP_URL
-              ).toString()}
-              width={24}
-              height={24}
-              alt="Logo"
-              style={{
-                objectFit: "contain",
-              }}
-            />
             <span
               style={{
-                color: "white",
+                color: "#57534a",
                 fontSize: "20px",
-                fontWeight: 500,
+                fontWeight: 400,
+                letterSpacing: "0.08em",
               }}
             >
-              abd.im
+              ahmet burak dinç
             </span>
           </div>
 
@@ -71,9 +60,9 @@ export async function GET(req: NextRequest) {
           >
             <h1
               style={{
-                fontSize: "48px",
-                fontWeight: 700,
-                color: "#a7f3d0",
+                fontSize: "56px",
+                fontWeight: 400,
+                color: "#111111",
                 lineHeight: 1.2,
                 textAlign: "center",
                 margin: 0,
