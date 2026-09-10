@@ -42,12 +42,12 @@ const WORK = [
     year: "2024",
     body: (
       <>
-        I worked at <b>Datateam</b> on a data warehouse consolidation over 30B+
-        records — custom ETL tooling, Kubernetes buildout and query tuning that
+        I worked at <b>Datateam</b> on real time face recognition system with 300M+
+        face embeddings and vector search algorithms. We built a data warehouse over 30B+
+        records with custom ETL tooling, Kubernetes buildout and query tuning,
         took our slowest reports from 45 minutes down to 1. I also designed an
         OCR document pipeline handling 100K+ records a day, and a dynamic API
-        platform on top of the warehouse with per-tenant permissions, rate
-        limiting and OpenAPI docs.
+        platform on top of the warehouse.
       </>
     ),
   },
@@ -120,10 +120,8 @@ export default function About() {
 
       <p className="my-5">
         I&apos;m a software engineer at Aselsan, and I&apos;m studying financial
-        mathematics at METU. I spend most of my spare cycles on{" "}
-        <b>high-frequency trading</b>, <b>quantitative research</b> and{" "}
-        <b>market making</b> — market microstructure, execution, and the systems
-        fast enough to act on both.
+        mathematics at METU. I am interested in high-frequency trading, quantitative research and market making.
+        I love computers and markets.
       </p>
 
       <section className="section-rule">
