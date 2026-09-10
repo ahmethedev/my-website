@@ -28,7 +28,7 @@ const EXPERIENCE: Entry[] = [
     org: "Datateam",
     role: "Software engineer, 2024 — 2026",
     points: [
-      "Played a key role in a large-scale data warehouse consolidation project processing 30B+ records, contributing to the development of custom ETL tools, database configuration, and system optimization. Collaborated on implementing comprehensive error handling, database installation, Kubernetes cluster setup, and distributed data management strategies, resulting in query performance improvement from 45 minutes to 1 minute.",
+      "Played a key role in building a real time face recognition system with 300M+ face embeddings and vector search algorithms, and a large-scale data warehouse consolidation project processing 30B+ records, contributing to the development of custom ETL tools, database configuration, and system optimization. Collaborated on implementing comprehensive error handling, database installation, Kubernetes cluster setup, and distributed data management strategies, resulting in query performance improvement from 45 minutes to 1 minute.",
       "Designed and implemented complete system architecture for an OCR-based document processing pipeline, including error handling, data flow, storage strategies, and database schema design, handling 100K+ daily records with 99.9% uptime.",
       "Built a dynamic API generation platform for a data warehouse with custom permissions, rate limiting, batch processing and OpenAPI-compliant documentation; handles 1k+ daily requests and provides request analytics via a dashboard.",
     ],
@@ -129,16 +129,11 @@ export default function Work() {
   return (
     <Container className="container animate-enter pt-10">
       <h1 className="mb-6 mt-0 text-[2.1rem] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[2.6rem]">
-        Curriculum vitae
+        CV
       </h1>
       <p className="my-5">
-        Software engineer, currently at Aselsan and reading financial mathematics
-        at METU. My own work leans toward quantitative research and trading
-        systems — see the{" "}
-        <Link href="/#projects" className="whitespace-nowrap">
-          projects
-        </Link>{" "}
-        on the home page.
+        Software engineer at Aselsan, studying financial mathematics
+        at METU.
       </p>
 
       <Section heading="Experience" entries={EXPERIENCE} />
