@@ -7,6 +7,13 @@ export type Project = {
 
 export const PROJECTS: Project[] = [
   {
+    name: "thatsmyquant",
+    href: "https://github.com/ahmethedev/agentic-trading",
+    repo: "https://github.com/ahmethedev/agentic-trading",
+    description:
+      "Explainable spot trading agent for OKX TR that records every decision, including every wait.",
+  },
+  {
     name: "last-pump",
     href: "https://last-pump.com/",
     repo: "https://github.com/ahmethedev/lastpump",
